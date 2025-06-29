@@ -118,7 +118,7 @@ local CheckBoxTables = {
 	["Smart Salvation Remover"] = {
 		[0] = "LazyPigCheckboxGroupSalvationRemover",
 		[1] = { "LazyPigCheckbox60", "Always" },
-		[2] = { "LazyPigCheckbox61", "Warrior Shield/Druid Bear" },
+		[2] = { "LazyPigCheckbox61", "Warrior Shield/Druid Bear/Paladin RF" },
 	},
 
 	["Mana Buff Remover (Spirit, Int, Wis)"] = {

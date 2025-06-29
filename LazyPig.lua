@@ -160,7 +160,7 @@ LazyPigMenuStrings[54] = "Leader Queue Announce"
 LazyPigMenuStrings[55] = "Block BG Quest Sharing"
 
 LazyPigMenuStrings[60] = "Always"
-LazyPigMenuStrings[61] = "Warrior Shield/Druid Bear"
+LazyPigMenuStrings[61] = "Warrior Shield/Druid Bear/Paladin RF"
 LazyPigMenuStrings[62] = "Remove Wis/Int/Spirit"
 LazyPigMenuStrings[63] = "Remove Aspect of the Wolf"
 
@@ -2256,7 +2256,7 @@ end
 
 local salvationbuffs = {"Spell_Holy_SealOfSalvation", "Spell_Holy_GreaterBlessingofSalvation"}
 function LazyPig_CheckSalvation()
-	if(LPCONFIG.SALVA == 1 or LPCONFIG.SALVA == 2 and (LazyPig_IsShieldEquipped() and LazyPig_PlayerClass("Warrior", "player") or LazyPig_IsBearForm())) then
+	if(LPCONFIG.SALVA == 1 or (LPCONFIG.SALVA == 2 and (LazyPig_IsShieldEquipped() and LazyPig_PlayerClass("Warrior", "player") or LazyPig_IsBearForm() or LazyPig_HasRighteousFury()))) then
 		local counter = 0
 		while GetPlayerBuff(counter) >= 0 do
 			local index, untilCancelled = GetPlayerBuff(counter)
@@ -2450,3 +2450,18 @@ function LazyPig_Duel_EFC()
 	end	
 end
 
+function LazyPig_HasRighteousFury()
+	if not LazyPig_PlayerClass("Paladin", "player") then return false end
+	local counter = 0
+	while GetPlayerBuff(counter) >= 0 do
+		local index, untilCancelled = GetPlayerBuff(counter)
+		if untilCancelled == 1 then
+			local texture = GetPlayerBuffTexture(index)
+			if texture and string.find(texture, "Spell_Holy_SealOfFury") then
+				return true
+			end
+		end
+		counter = counter + 1
+	end
+	return false
+end
