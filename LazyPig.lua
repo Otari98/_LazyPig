@@ -26,7 +26,10 @@ LPCONFIG.NAXX = 0
 LPCONFIG.BWL = 0
 LPCONFIG.WHITE_TAILORING = 0
 LPCONFIG.FOOD_AND_DRINK = 0
+LPCONFIG.POTIONS = 0
 LPCONFIG.ES_SHARDS = 0
+LPCONFIG.KARA_ESSENCE = 0
+LPCONFIG.KARA_RAID = 0
 LPCONFIG.ROLLMSG = true
 LPCONFIG.DUEL = false
 LPCONFIG.GREEN = 2
@@ -120,37 +123,28 @@ ScheduleSplit.dslot = {}
 ScheduleSplit.sbag = {}
 ScheduleSplit.count = {}
 
+local LazyPigNeedGreedPass = {}
 local LazyPigMenuObjects = {}
 local LazyPigMenuStrings = {}
-LazyPigMenuStrings[00] = "Need"
-LazyPigMenuStrings[01] = "Greed"
-LazyPigMenuStrings[02] = "Pass"
-LazyPigMenuStrings[03] = "Need"
-LazyPigMenuStrings[04] = "Greed"
-LazyPigMenuStrings[05] = "Pass"
-LazyPigMenuStrings[06] = "Need"
-LazyPigMenuStrings[07] = "Greed"
-LazyPigMenuStrings[08] = "Pass"
-LazyPigMenuStrings[09] = "Need"
-LazyPigMenuStrings[10] = "Greed"
-LazyPigMenuStrings[11] = "Pass"
-LazyPigMenuStrings[12] = "Need"
-LazyPigMenuStrings[13] = "Greed"
-LazyPigMenuStrings[14] = "Pass"
-LazyPigMenuStrings[15] = "Need"
-LazyPigMenuStrings[16] = "Greed"
-LazyPigMenuStrings[17] = "Pass"
-LazyPigMenuStrings[18] = "Need"
-LazyPigMenuStrings[19] = "Greed"
-LazyPigMenuStrings[20] = "Pass"
+function NeedGreedPassSetup(idx, key)
+	LazyPigMenuStrings[idx] = "Need"
+	LazyPigMenuStrings[idx+1] = "Greed"
+	LazyPigMenuStrings[idx+2] = "Pass"
+	LazyPigNeedGreedPass[key] = idx
+end
+NeedGreedPassSetup(00, "GREEN")
+NeedGreedPassSetup(03, "ZG")
+NeedGreedPassSetup(06, "MC")
+NeedGreedPassSetup(09, "AQ")
+NeedGreedPassSetup(12, "AQMOUNT")
+NeedGreedPassSetup(15, "SAND")
+NeedGreedPassSetup(18, "NAXX")
 LazyPigMenuStrings[21] = "LazyPig Auto Roll Messages"
 LazyPigMenuStrings[22] = "Dungeon"
 LazyPigMenuStrings[23] = "Raid"
 LazyPigMenuStrings[24] = "Battleground"
 LazyPigMenuStrings[25] = "Mute Permanently"
-LazyPigMenuStrings[26] = "Need"
-LazyPigMenuStrings[27] = "Greed"
-LazyPigMenuStrings[28] = "Pass"
+NeedGreedPassSetup(26, "BWL")
 LazyPigMenuStrings[30] = "GuildMates"
 LazyPigMenuStrings[31] = "Friends"
 LazyPigMenuStrings[32] = "Strangers"
@@ -186,15 +180,12 @@ LazyPigMenuStrings[97] = "Instance Resurrection Accept OOC"
 LazyPigMenuStrings[98] = "Gossip Auto Processing"
 LazyPigMenuStrings[100] = "Auto Dismount"
 LazyPigMenuStrings[101] = "Chat Spam Filter"
-LazyPigMenuStrings[102] = "Need"
-LazyPigMenuStrings[103] = "Greed"
-LazyPigMenuStrings[104] = "Pass"
-LazyPigMenuStrings[105] = "Need"
-LazyPigMenuStrings[106] = "Greed"
-LazyPigMenuStrings[107] = "Pass"
-LazyPigMenuStrings[108] = "Need"
-LazyPigMenuStrings[109] = "Greed"
-LazyPigMenuStrings[110] = "Pass"
+NeedGreedPassSetup(102, "WHITE_TAILORING")
+NeedGreedPassSetup(105, "FOOD_AND_DRINK")
+NeedGreedPassSetup(108, "ES_SHARDS")
+NeedGreedPassSetup(111, "KARA_ESSENCE")
+NeedGreedPassSetup(114, "KARA_RAID")
+NeedGreedPassSetup(117, "POTIONS")
 
 function LazyPig_OnLoad()
 	SelectGossipActiveQuest = LazyPig_SelectGossipActiveQuest;
@@ -1056,10 +1047,29 @@ function LazyPig_AutoRoll(id)
 		end
 	end
 
+	if LPCONFIG.POTIONS and quality == 1 and (string.find(name, "Mana Potion") or string.find(name, "Healing Potion")) then
+		cfg = LPCONFIG.POTIONS
+		RollOnLoot(id, LPCONFIG.POTIONS)
+	end
+
 	if LPCONFIG.ES_SHARDS and string.find(zone, "Emerald Sanctum") then
 		if string.find(name, "Dreamscale") or string.find(name, "Fading Dream Fragment") or string.find(name, "Small Dream Shard") then
 			cfg = LPCONFIG.ES_SHARDS
 			RollOnLoot(id, LPCONFIG.ES_SHARDS)
+		end
+	end
+
+	if LPCONFIG.KARA_ESSENCE and string.find(zone, "Tower of Karazhan") then
+		if string.find(name, "Arcane Essence") then
+			cfg = LPCONFIG.KARA_ESSENCE
+			RollOnLoot(id, LPCONFIG.KARA_ESSENCE)
+		end
+	end
+
+	if LPCONFIG.KARA_RAID and string.find(zone, "Tower of Karazhan") then
+		if string.find(name, "Pristine Ley Crystal") then
+			cfg = LPCONFIG.KARA_RAID
+			RollOnLoot(id, LPCONFIG.KARA_RAID)
 		end
 	end
 
@@ -1822,40 +1832,30 @@ function LazyPig_RefreshNameplates()
 	end
 end
 
+function HandleGetNeedGreedPass(num)
+	for key,need in pairs(LazyPigNeedGreedPass) do
+		local greed = need + 1
+		local pass = need + 2 
+		if num == need and LPCONFIG[key] == 1
+		or num == greed and LPCONFIG[key] == 2
+		or num == pass and LPCONFIG[key] == 0 then
+			return true
+		end
+	end
+	return false
+end
+
 function LazyPig_GetOption(num)
 	local labelString = getglobal(this:GetName().."Text");
 	local label = LazyPigMenuStrings[num] or "";
 	LazyPigMenuObjects[num] = this
 
-	if num == 00 and LPCONFIG.GREEN == 1
-	or num == 01 and LPCONFIG.GREEN == 2 
-	or num == 02 and LPCONFIG.GREEN == 0 
-	or num == 03 and LPCONFIG.ZG == 1		
-	or num == 04 and LPCONFIG.ZG == 2
-	or num == 05 and LPCONFIG.ZG == 0
-	or num == 06 and LPCONFIG.MC == 1
-	or num == 07 and LPCONFIG.MC == 2
-	or num == 08 and LPCONFIG.MC == 0
-	or num == 09 and LPCONFIG.AQ == 1
-	or num == 10 and LPCONFIG.AQ == 2
-	or num == 11 and LPCONFIG.AQ == 0
-	or num == 12 and LPCONFIG.AQMOUNT == 1
-	or num == 13 and LPCONFIG.AQMOUNT == 2
-	or num == 14 and LPCONFIG.AQMOUNT == 0
-	or num == 15 and LPCONFIG.SAND == 1
-	or num == 16 and LPCONFIG.SAND == 2
-	or num == 17 and LPCONFIG.SAND == 0
-	or num == 18 and LPCONFIG.NAXX == 1
-	or num == 19 and LPCONFIG.NAXX == 2
-	or num == 20 and LPCONFIG.NAXX == 0
+	if HandleGetNeedGreedPass(num)
 	or num == 21 and LPCONFIG.ROLLMSG
 	or num == 22 and LPCONFIG.WORLDDUNGEON
 	or num == 23 and LPCONFIG.WORLDRAID
 	or num == 24 and LPCONFIG.WORLDBG
 	or num == 25 and LPCONFIG.WORLDUNCHECK
-	or num == 26 and LPCONFIG.BWL == 1
-	or num == 27 and LPCONFIG.BWL == 2
-	or num == 28 and LPCONFIG.BWL == 0
 	or num == 30 and LPCONFIG.GINV
 	or num == 31 and LPCONFIG.FINV
 	or num == 32 and LPCONFIG.SINV
@@ -1894,15 +1894,6 @@ function LazyPig_GetOption(num)
 	or num == 98 and LPCONFIG.GOSSIP
 	or num == 100 and LPCONFIG.DISMOUNT
 	or num == 101 and LPCONFIG.SPAM
-	or num == 102 and LPCONFIG.WHITE_TAILORING == 1
-	or num == 103 and LPCONFIG.WHITE_TAILORING == 2
-	or num == 104 and LPCONFIG.WHITE_TAILORING == 0
-	or num == 105 and LPCONFIG.FOOD_AND_DRINK == 1
-	or num == 106 and LPCONFIG.FOOD_AND_DRINK == 2
-	or num == 107 and LPCONFIG.FOOD_AND_DRINK == 0
-	or num == 108 and LPCONFIG.ES_SHARDS == 1
-	or num == 109 and LPCONFIG.ES_SHARDS == 2
-	or num == 110 and LPCONFIG.ES_SHARDS == 0
 	
 	or nil then
 		this:SetChecked(true);
@@ -1912,113 +1903,38 @@ function LazyPig_GetOption(num)
 	labelString:SetText(label);
 end
 
+function HandleSetNeedGreedPass(num, checked)
+	for key,need in pairs(LazyPigNeedGreedPass) do
+		local greed = need + 1
+		local pass = need + 2
+		if num == need then 
+			LPCONFIG[key] = 1
+			if not checked then LPCONFIG[key] = nil end
+			LazyPigMenuObjects[greed]:SetChecked(nil)
+			LazyPigMenuObjects[pass]:SetChecked(nil)
+			return true
+		elseif num == greed then 
+			LPCONFIG[key] = 2
+			if not checked then LPCONFIG[key] = nil end
+			LazyPigMenuObjects[need]:SetChecked(nil)
+			LazyPigMenuObjects[pass]:SetChecked(nil)
+			return true
+		elseif num == pass then
+			LPCONFIG[key] = 0
+			if not checked then LPCONFIG[key] = nil end
+			LazyPigMenuObjects[greed]:SetChecked(nil)
+			LazyPigMenuObjects[need]:SetChecked(nil)
+			return true
+		end
+	end
+	return false
+end
+
 function LazyPig_SetOption(num)
 	local checked = this:GetChecked()
-	if num == 00 then 
-		LPCONFIG.GREEN = 1
-		if not checked then LPCONFIG.GREEN = nil end
-		LazyPigMenuObjects[01]:SetChecked(nil)
-		LazyPigMenuObjects[02]:SetChecked(nil)
-	elseif num == 01 then 
-		LPCONFIG.GREEN = 2
-		if not checked then LPCONFIG.GREEN = nil end
-		LazyPigMenuObjects[00]:SetChecked(nil)
-		LazyPigMenuObjects[02]:SetChecked(nil)
-	elseif num == 02 then
-		LPCONFIG.GREEN = 0
-		if not checked then LPCONFIG.GREEN = nil end
-		LazyPigMenuObjects[00]:SetChecked(nil)
-		LazyPigMenuObjects[01]:SetChecked(nil)
-	elseif num == 03 then
-		LPCONFIG.ZG = 1
-		if not checked then LPCONFIG.ZG = nil end
-		LazyPigMenuObjects[04]:SetChecked(nil)
-		LazyPigMenuObjects[05]:SetChecked(nil)
-	elseif num == 04 then 
-		LPCONFIG.ZG = 2
-		if not checked then LPCONFIG.ZG = nil end
-		LazyPigMenuObjects[03]:SetChecked(nil)
-		LazyPigMenuObjects[05]:SetChecked(nil)
-	elseif num == 05 then
-		LPCONFIG.ZG = 0
-		if not checked then LPCONFIG.ZG = nil end
-		LazyPigMenuObjects[03]:SetChecked(nil)
-		LazyPigMenuObjects[04]:SetChecked(nil)
-	elseif num == 06 then
-		LPCONFIG.MC = 1
-		if not checked then LPCONFIG.MC = nil end
-		LazyPigMenuObjects[07]:SetChecked(nil)
-		LazyPigMenuObjects[08]:SetChecked(nil)
-	elseif num == 07 then 
-		LPCONFIG.MC = 2
-		if not checked then LPCONFIG.MC = nil end
-		LazyPigMenuObjects[06]:SetChecked(nil)
-		LazyPigMenuObjects[08]:SetChecked(nil)
-	elseif num == 08 then
-		LPCONFIG.MC = 0
-		if not checked then LPCONFIG.MC = nil end
-		LazyPigMenuObjects[06]:SetChecked(nil)
-		LazyPigMenuObjects[07]:SetChecked(nil)	
-	elseif num == 09 then
-		LPCONFIG.AQ = 1
-		if not checked then LPCONFIG.AQ = nil end
-		LazyPigMenuObjects[10]:SetChecked(nil)
-		LazyPigMenuObjects[11]:SetChecked(nil)
-	elseif num == 10 then 
-		LPCONFIG.AQ = 2
-		if not checked then LPCONFIG.AQ = nil end
-		LazyPigMenuObjects[09]:SetChecked(nil)
-		LazyPigMenuObjects[11]:SetChecked(nil)
-	elseif num == 11 then
-		LPCONFIG.AQ = 0
-		if not checked then LPCONFIG.AQ = nil end
-		LazyPigMenuObjects[09]:SetChecked(nil)
-		LazyPigMenuObjects[10]:SetChecked(nil)	
-	elseif num == 12 then
-		LPCONFIG.AQMOUNT = 1
-		if not checked then LPCONFIG.AQMOUNT = nil end
-		LazyPigMenuObjects[13]:SetChecked(nil)
-		LazyPigMenuObjects[14]:SetChecked(nil)
-	elseif num == 13 then 
-		LPCONFIG.AQMOUNT = 2
-		if not checked then LPCONFIG.AQMOUNT = nil end
-		LazyPigMenuObjects[12]:SetChecked(nil)
-		LazyPigMenuObjects[14]:SetChecked(nil)
-	elseif num == 14 then
-		LPCONFIG.AQMOUNT = 0
-		if not checked then LPCONFIG.AQMOUNT = nil end
-		LazyPigMenuObjects[12]:SetChecked(nil)
-		LazyPigMenuObjects[13]:SetChecked(nil)
-	elseif num == 15 then
-		LPCONFIG.SAND = 1
-		if not checked then LPCONFIG.SAND = nil end
-		LazyPigMenuObjects[16]:SetChecked(nil)
-		LazyPigMenuObjects[17]:SetChecked(nil)
-	elseif num == 16 then 
-		LPCONFIG.SAND = 2
-		if not checked then LPCONFIG.SAND = nil end
-		LazyPigMenuObjects[15]:SetChecked(nil)
-		LazyPigMenuObjects[17]:SetChecked(nil)
-	elseif num == 17 then
-		LPCONFIG.SAND = 0
-		if not checked then LPCONFIG.SAND = nil end
-		LazyPigMenuObjects[18]:SetChecked(nil)
-		LazyPigMenuObjects[19]:SetChecked(nil)	
-	elseif num == 18 then
-		LPCONFIG.NAXX = 1
-		if not checked then LPCONFIG.NAXX = nil end
-		LazyPigMenuObjects[19]:SetChecked(nil)
-		LazyPigMenuObjects[20]:SetChecked(nil)
-	elseif num == 19 then 
-		LPCONFIG.NAXX = 2
-		if not checked then LPCONFIG.NAXX = nil end
-		LazyPigMenuObjects[18]:SetChecked(nil)
-		LazyPigMenuObjects[20]:SetChecked(nil)
-	elseif num == 20 then
-		LPCONFIG.NAXX = 0
-		if not checked then LPCONFIG.NAXX = nil end
-		LazyPigMenuObjects[18]:SetChecked(nil)
-		LazyPigMenuObjects[19]:SetChecked(nil)	
+	if HandleSetNeedGreedPass(num, checked) then
+		--DEFAULT_CHAT_FRAME:AddMessage("DEBUG: Num chosen - "..num)
+		return
 	elseif num == 21 then 
 		LPCONFIG.ROLLMSG = true
 		if not checked then LPCONFIG.ROLLMSG = nil end		
@@ -2061,21 +1977,6 @@ function LazyPig_SetOption(num)
 			LazyPigMenuObjects[24]:SetChecked(nil)
 		end
 		LazyPig_ZoneCheck()
-	elseif num == 26 then
-		LPCONFIG.BWL = 1
-		if not checked then LPCONFIG.BWL = nil end
-		LazyPigMenuObjects[27]:SetChecked(nil)
-		LazyPigMenuObjects[28]:SetChecked(nil)
-	elseif num == 27 then 
-		LPCONFIG.BWL = 2
-		if not checked then LPCONFIG.BWL = nil end
-		LazyPigMenuObjects[26]:SetChecked(nil)
-		LazyPigMenuObjects[28]:SetChecked(nil)
-	elseif num == 28 then
-		LPCONFIG.BWL = 0
-		if not checked then LPCONFIG.BWL = nil end
-		LazyPigMenuObjects[26]:SetChecked(nil)
-		LazyPigMenuObjects[27]:SetChecked(nil)	
 	elseif num == 30 then 								--fixed
 		LPCONFIG.GINV = true
 		if not checked then LPCONFIG.GINV = nil end
@@ -2200,51 +2101,6 @@ function LazyPig_SetOption(num)
 	elseif num == 101 then
 		LPCONFIG.SPAM  = true
 		if not checked then LPCONFIG.SPAM  = nil end			
-	elseif num == 102 then
-		LPCONFIG.WHITE_TAILORING = 1
-		if not checked then LPCONFIG.WHITE_TAILORING = nil end
-		LazyPigMenuObjects[103]:SetChecked(nil)
-		LazyPigMenuObjects[104]:SetChecked(nil)
-	elseif num == 103 then 
-		LPCONFIG.WHITE_TAILORING = 2
-		if not checked then LPCONFIG.WHITE_TAILORING = nil end
-		LazyPigMenuObjects[102]:SetChecked(nil)
-		LazyPigMenuObjects[104]:SetChecked(nil)
-	elseif num == 104 then
-		LPCONFIG.WHITE_TAILORING = 0
-		if not checked then LPCONFIG.WHITE_TAILORING = nil end
-		LazyPigMenuObjects[102]:SetChecked(nil)
-		LazyPigMenuObjects[103]:SetChecked(nil)
-	elseif num == 105 then
-		LPCONFIG.FOOD_AND_DRINK = 1
-		if not checked then LPCONFIG.FOOD_AND_DRINK = nil end
-		LazyPigMenuObjects[106]:SetChecked(nil)
-		LazyPigMenuObjects[107]:SetChecked(nil)
-	elseif num == 106 then 
-		LPCONFIG.FOOD_AND_DRINK = 2
-		if not checked then LPCONFIG.FOOD_AND_DRINK = nil end
-		LazyPigMenuObjects[105]:SetChecked(nil)
-		LazyPigMenuObjects[107]:SetChecked(nil)
-	elseif num == 107 then
-		LPCONFIG.FOOD_AND_DRINK = 0
-		if not checked then LPCONFIG.FOOD_AND_DRINK = nil end
-		LazyPigMenuObjects[105]:SetChecked(nil)
-		LazyPigMenuObjects[106]:SetChecked(nil)	
-	elseif num == 108 then
-		LPCONFIG.ES_SHARDS = 1
-		if not checked then LPCONFIG.ES_SHARDS = nil end
-		LazyPigMenuObjects[109]:SetChecked(nil)
-		LazyPigMenuObjects[110]:SetChecked(nil)
-	elseif num == 109 then 
-		LPCONFIG.ES_SHARDS = 2
-		if not checked then LPCONFIG.ES_SHARDS = nil end
-		LazyPigMenuObjects[108]:SetChecked(nil)
-		LazyPigMenuObjects[110]:SetChecked(nil)
-	elseif num == 110 then
-		LPCONFIG.ES_SHARDS = 0
-		if not checked then LPCONFIG.ES_SHARDS = nil end
-		LazyPigMenuObjects[108]:SetChecked(nil)
-		LazyPigMenuObjects[109]:SetChecked(nil)	
 	else
 		--DEFAULT_CHAT_FRAME:AddMessage("DEBUG: No num assigned - "..num)
 	end
