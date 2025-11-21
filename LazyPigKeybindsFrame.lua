@@ -1,3 +1,5 @@
+local _G = _G or getfenv(0)
+
 local FontstringTables = {
 	["Non Configurable Enhancements"] = {
 		[0] = "LazyPigNCE",
@@ -65,7 +67,7 @@ local function FontstringGroup(hParent, offsetX, offsetY, sTitle, tCheck, tCol1,
 			fsname = "LP_KB" .. tostring(k)
 		end
 		local fsc = frame:CreateFontString(fsname, "ARTWORK", "GameFontNormalSmall")
-		fsc:SetPoint("LEFT", getglobal(v[1]), "LEFT", 10+max_width[1], 0)
+		fsc:SetPoint("LEFT", _G[v[1]], "LEFT", 10+max_width[1], 0)
 		fsc:SetText(v[3])
 		fsc:SetTextColor(tCol2[1], tCol2[2], tCol2[3], tCol2[4])
 
@@ -74,8 +76,7 @@ local function FontstringGroup(hParent, offsetX, offsetY, sTitle, tCheck, tCol1,
 end
 
 function LazyPig_CreateKeybindsFrame()
-	local LPF = getglobal("LazyPigOptionsFrame")
-	local LPF_Bottom = LPF:GetBottom()
+	local LPF = LazyPigOptionsFrame
 	-- Keybinds Frame
 	local frame = CreateFrame("Frame", "LazyPigKeybindsFrame")
 	tinsert(UISpecialFrames,"LazyPigKeybindsFrame")

@@ -63,7 +63,7 @@ local CheckBoxTables = {
 		[3] = { "LazyPigCheckbox28", "Pass" }
 	},
 	
-	["Tailoring Roll Automation (Silks and Cloth)"] = {
+	["Cloth Roll Automation"] = {
 		[0] = "LazyPigCheckboxGroupTailoringRoll",
 		[1] = { "LazyPigCheckbox102", "Need" },
 		[2] = { "LazyPigCheckbox103", "Greed" },
@@ -104,11 +104,6 @@ local CheckBoxTables = {
 		[0] = "LazyPigCheckBoxGroupManaBuffRemover",
 		[1] = {"LazyPigCheckbox62","Always"}
 	},
-
-	["Aspect of the Wolf"] = {
-		[0] = "LazyPigCheckBoxGroupAspect",
-		[1] = { "LazyPigCheckbox63", "Remove Aspect of the Wolf", "Remove Wolf when attempting to shoot." },
-	},
 	
 	["Nameplates Display Rules"] = {
 		[0] = "LazyPigCheckboxGroupNameplates",
@@ -137,11 +132,12 @@ local CheckBoxTables = {
 		[8] = { "LazyPigCheckbox97", "Instance Resurrection Accept OOC", "Auto Accept Resurrection if OutOfCombat" },
 		[9] = { "LazyPigCheckbox98", "Gossip Auto Processing", "Skip Gossip-Windows-Choises from Innkeepers and FlyMasters" },
 		[10] = { "LazyPigCheckbox100", "Auto Dismount", "Auto-Dismount when it's required by another action" },
+		[11] = { "LazyPigCheckbox63", "Auto Stance", "Automatically change to required warrior stance/druid form on spell cast" },
 		--[12] = { "LazyPigCheckbox101", "Chat Spam Filter", "One minute ban for identical messages" },
 		--[12] = { "LazyPigCheckbox102", "Block Battleground Quest Sharing", "Really? No more 'Stable' spam?" }
 	},
 	
-		["Chat Filter"] = {
+	["Chat Filter"] = {
 		[0] = "LazyPigCheckboxChatFilter",
 		[1] = { "LazyPigCheckbox70", "Players' Spam" },
 		[2] = { "LazyPigCheckbox71", "Uncommon Roll" },
@@ -187,11 +183,10 @@ local function CheckBoxGroup(hParent, offsetX, offsetY, sTitle, tCheck)
 		cb:SetScript("OnEnter", function()
 			if this.tooltipTitle then
 				GameTooltip:SetOwner(this, "ANCHOR_TOPRIGHT")
-				--GameTooltip:SetScale(.71)
 				GameTooltip:SetBackdropColor(.01, .01, .01, .91)
 				GameTooltip:SetText(this.tooltipTitle)
 				if this.tooltipText then
-					GameTooltip:AddLine(this.tooltipText, 1, 1, 1)
+					GameTooltip:AddLine(this.tooltipText, 1, 1, 1, true)
 				end
 				GameTooltip:Show()
 			end
@@ -208,24 +203,21 @@ end
 
 function LazyPig_CreateOptionsFrame()
 	-- Option Frame
-	local frame = CreateFrame("Frame", "LazyPigOptionsFrame")
+	local frame = CreateFrame("Frame", "LazyPigOptionsFrame", UIParent)
 	tinsert(UISpecialFrames,"LazyPigOptionsFrame")
-	-- frame:SetScale(.81)
 	frame:SetFrameStrata("DIALOG")
-	frame:SetWidth(630)
-	frame:SetHeight(643)
-	
-	frame:SetPoint("TOPLEFT", nil, "TOPLEFT", 250, -50)
-	frame:SetBackdrop( {
-			bgFile = "Interface\\Buttons\\WHITE8x8", 
-			edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border", 
-			tile = true, 
-			tileSize = 32, 
-			edgeSize = 32, 
-			insets = { left = 11, right = 12, top = 12, bottom = 11 }
-		} );
+	frame:SetWidth(640)
+	frame:SetHeight(660)
+	frame:SetPoint("CENTER", UIParent)
+	frame:SetBackdrop({
+		bgFile = "Interface\\Buttons\\WHITE8x8",
+		edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+		tile = true,
+		tileSize = 32,
+		edgeSize = 32,
+		insets = { left = 11, right = 12, top = 12, bottom = 11 }
+	});
 	frame:SetBackdropColor(0, 0, 0, .8)
-
 	frame:SetMovable(true)
 	frame:EnableMouse(true)
 	frame:SetClampedToScreen(false)
@@ -330,7 +322,7 @@ function LazyPig_CreateOptionsFrame()
 	local str = "Food and Drink Roll Automation"
 	frame.cbgroup_foodanddrink = CheckBoxGroup(frame, 250, -45, str, CheckBoxTables[str])
 
-	local str = "Tailoring Roll Automation (Silks and Cloth)"
+	local str = "Cloth Roll Automation"
 	frame.cbgroup_tailoring = CheckBoxGroup(frame, 250, -107, str, CheckBoxTables[str])
 
 	local str = "Smart Salvation Remover"
@@ -356,9 +348,6 @@ function LazyPig_CreateOptionsFrame()
 
 	local str = "Mana Buff Remover"
 	frame.cbgroup_manabuffremover = CheckBoxGroup(frame,450,-220,str,CheckBoxTables[str])
-
-	local str = "Aspect of the Wolf"
-	frame.cbgroup_aspectremover = CheckBoxGroup(frame,450,-255,str,CheckBoxTables[str])
 
 	return frame
 
