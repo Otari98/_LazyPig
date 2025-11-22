@@ -1,51 +1,44 @@
 local _G = _G or getfenv(0)
 
+-- Default SavedVariables
 LPCONFIG = {}
-LPCONFIG.DISMOUNT = true
-LPCONFIG.AUTOSTANCE = true
-LPCONFIG.CAM = false
-LPCONFIG.GINV = true
-LPCONFIG.FINV = true
-LPCONFIG.SINV = nil
-LPCONFIG.DINV = true
-LPCONFIG.SUMM = true
-LPCONFIG.EBG = true
-LPCONFIG.LBG = true
-LPCONFIG.QBG = true
-LPCONFIG.RBG = true
-LPCONFIG.SBG = false
-LPCONFIG.AQUE = true
-LPCONFIG.LOOT = true
-LPCONFIG.EPLATE = false
-LPCONFIG.FPLATE = false
-LPCONFIG.HPLATE = false
-LPCONFIG.RIGHT = true
-LPCONFIG.ZG = 1
-LPCONFIG.MC = 1
-LPCONFIG.AQ = 2
-LPCONFIG.AQMOUNT = 0
-LPCONFIG.SAND = 1
-LPCONFIG.NAXX = 0
-LPCONFIG.BWL = 0
-LPCONFIG.WHITE_TAILORING = 0
-LPCONFIG.FOOD_AND_DRINK = 0
-LPCONFIG.ES_SHARDS = 0
-LPCONFIG.ROLLMSG = true
-LPCONFIG.DUEL = false
-LPCONFIG.GREEN = 2
-LPCONFIG.SPECIALKEY = true
-LPCONFIG.WORLDDUNGEON = false
-LPCONFIG.WORLDRAID = false
-LPCONFIG.WORLDBG = false
-LPCONFIG.WORLDUNCHECK = nil
-LPCONFIG.SPAM = false
-LPCONFIG.SPAM_UNCOMMON = false
-LPCONFIG.SPAM_RARE = false
-LPCONFIG.SHIFTSPLIT = false
-LPCONFIG.REZ = true
-LPCONFIG.GOSSIP = true
-LPCONFIG.SALVA = false
-LPCONFIG.REMOVEMANABUFFS = false
+LPCONFIG.DISMOUNT = true           -- Auto Dismount
+LPCONFIG.AUTOSTANCE = true         -- Auto Stance
+LPCONFIG.CAM = false               -- Extended camera distance
+LPCONFIG.GINV = true               -- Auto accept invites from guild members
+LPCONFIG.FINV = true               -- Auto accept invites from friends
+LPCONFIG.SINV = false              -- Auto accept invites from strangers
+LPCONFIG.DINV = true               -- Disable auto accept invite whiel in bg or in bg queue
+LPCONFIG.SUMM = true               -- Auto accept summons
+LPCONFIG.EBG = true                -- Auto join battleground
+LPCONFIG.LBG = true                -- Auto leave battleground
+LPCONFIG.QBG = true                -- Auto queue battleground
+LPCONFIG.RBG = true                -- Auto release spirit in battleground
+LPCONFIG.SBG = false               -- Auto decline quest sharing while in battleground
+LPCONFIG.AQUE = true               -- Announce when queueing for battleground as party leader
+LPCONFIG.LOOT = true               -- Position loot frame at cursor
+LPCONFIG.RIGHT = true              -- Improved right click
+LPCONFIG.GREEN = 2                 -- Auto roll on green items
+LPCONFIG.ZG = 1                    -- ZG coins/bijou auto roll
+LPCONFIG.MC = 1                    -- MC mats auto roll
+LPCONFIG.AQ = 1                    -- AQ scarabs/idols auto roll
+LPCONFIG.SAND = 1                  -- Corrupted sand auto roll
+LPCONFIG.ES_SHARDS = 0             -- Dream Shrads auto roll
+LPCONFIG.ROLLMSG = true            -- Lazy Pig Auto Roll Messages
+LPCONFIG.DUEL = false              -- Auto cancel duels
+LPCONFIG.SPECIALKEY = true         -- Special key combinations
+LPCONFIG.WORLDDUNGEON = false      -- Mute Wolrd chat while in dungeons
+LPCONFIG.WORLDRAID = false         -- Mute Wolrd chat while in raid
+LPCONFIG.WORLDBG = false           -- Mute Wolrd chat while in battleground
+LPCONFIG.WORLDUNCHECK = false      -- Mute Wolrd chat always
+LPCONFIG.SPAM = false              -- Hide players spam messages
+LPCONFIG.SPAM_UNCOMMON = false     -- Hide green items roll messages
+LPCONFIG.SPAM_RARE = false         -- Hide blue items roll messages
+LPCONFIG.SHIFTSPLIT = false        -- Improved stack splitting with shift
+LPCONFIG.REZ = true                -- Auto accept resurrection while in raid, dungeon or bg if resurrecter is out of combat
+LPCONFIG.GOSSIP = true             -- Auto proccess gossip
+LPCONFIG.SALVA = nil               -- Autoremove Blessing of Salvation
+LPCONFIG.REMOVEMANABUFFS = false   -- Autoremove Blessing of Wisdom, Arcane Intellect, Prayer of Spirit
 
 BINDING_HEADER_LP_HEADER = "_LazyPig";
 BINDING_NAME_LOGOUT = "Logout";
@@ -399,8 +392,6 @@ function LazyPig_OnEvent(event)
 
 		DEFAULT_CHAT_FRAME:AddMessage(LP_TITLE .. " v" .. LP_VERSION .. " by " .."|cffFF0066".. LP_AUTHOR .."|cffffffff".. " loaded, type".."|cff00eeee".." /lp".."|cffffffff for options")
 	elseif event == "PLAYER_LOGIN" then
-	--if event == "PLAYER_ENTERING_WORLD" then
-	--	this:UnregisterEvent("PLAYER_ENTERING_WORLD")
 		this:RegisterEvent("CHAT_MSG")
 		this:RegisterEvent("CHAT_MSG_SYSTEM")
 		this:RegisterEvent("PARTY_INVITE_REQUEST")
@@ -414,8 +405,6 @@ function LazyPig_OnEvent(event)
 		this:RegisterEvent("GOSSIP_SHOW")
 		this:RegisterEvent("QUEST_GREETING")
 		this:RegisterEvent("UI_ERROR_MESSAGE")
-		--this:RegisterEvent("CHAT_MSG_LOOT")
-		--this:RegisterEvent("CHAT_MSG_MONEY")
 		this:RegisterEvent("QUEST_PROGRESS")
 		this:RegisterEvent("QUEST_COMPLETE")
 		this:RegisterEvent("START_LOOT_ROLL")
@@ -448,16 +437,11 @@ function LazyPig_OnEvent(event)
 		LazyPig_AutoSummon();
 		ScheduleFunctionLaunch(LazyPig_ZoneCheck, 6);
 		ScheduleFunctionLaunch(LazyPig_ZoneCheck2, 7);
-		ScheduleFunctionLaunch(LazyPig_RefreshNameplates, 0.25);
-		MailtoCheck();
+		LazyPig_MailtoCheck();
 
 		if LPCONFIG.CAM then SetCVar("cameraDistanceMax",50) end
 		if LPCONFIG.LOOT then UIPanelWindows["LootFrame"] = nil end
 		QuestRecord["index"] = 0
-
-		--TargetUnit("player")
-		--SendChatMessage(".xp 8", "SAY") --qgaming version
-		--SendChatMessage(".exp 5", "SAY") --scriptcraft version
 
 	elseif LPCONFIG.SALVA and (event == "UNIT_INVENTORY_CHANGED" or ((event == "PLAYER_AURAS_CHANGED" or event == "UPDATE_BONUS_ACTIONBAR") and LazyPig_PlayerClass("Druid", "player"))) then
 		LazyPig_CheckSalvation()
@@ -466,7 +450,7 @@ function LazyPig_OnEvent(event)
 
 	elseif event == "DUEL_REQUESTED" then
 		duel_active = true
-		if LPCONFIG.DUEL and not IsShiftKeyDown() then --dnd_active and
+		if LPCONFIG.DUEL and not IsShiftKeyDown() then
 			duel_active = nil
 			CancelDuel()
 			UIErrorsFrame:AddMessage(arg1.." - Duel Cancelled")
@@ -486,7 +470,6 @@ function LazyPig_OnEvent(event)
 			wsgefc = nil
 		end
 
-		ScheduleFunctionLaunch(LazyPig_RefreshNameplates, 0.25)
 		ScheduleFunctionLaunch(LazyPig_ZoneCheck, 5)
 		ScheduleFunctionLaunch(LazyPig_ZoneCheck, 6)
 		--DEFAULT_CHAT_FRAME:AddMessage(event);
@@ -561,7 +544,6 @@ function LazyPig_OnEvent(event)
 
 		elseif string.find(arg1, string.sub(MARKED_DND, 1, string.len(MARKED_DND) -3)) then
 			afk_active = false
-			--if LPCONFIG.DUEL then CancelDuel() UIErrorsFrame:AddMessage("Duel Decline Atctive - DND") end
 
 		elseif string.find(arg1, string.sub(MARKED_AFK, 1, string.len(MARKED_AFK) -2)) then
 			afk_active = true
@@ -705,7 +687,7 @@ function LazyPig_StaticPopup_OnShow()
 	end
 end
 
-function MailtoCheck(msg)
+function LazyPig_MailtoCheck(msg)
 	if MailTo_Option then -- to avoid conflicts with mailto addon
 		local disable = LPCONFIG.RIGHT or LPCONFIG.SHIFT
 		MailTo_Option.noshift = disable
@@ -952,6 +934,7 @@ local RollReturn = function(config)
 	return txt
 end
 
+-- TODO: rewrite to use itemID instead
 function LazyPig_AutoRoll(id)
 	local cfg = 0
 	local zone = GetRealZoneText()
@@ -980,12 +963,12 @@ function LazyPig_AutoRoll(id)
 		end
 	end
 
-	if LPCONFIG.AQMOUNT and string.find(zone,"Ahn'Qiraj") then
-		if string.find(name, "Blue Qiraji Resonating") or string.find(name, "Green Qiraji Resonating") or string.find(name, "Yellow Qiraji Resonating") then
-			cfg = LPCONFIG.AQMOUNT
-			RollOnLoot(id, LPCONFIG.AQMOUNT);
-		end
-	end
+	-- if LPCONFIG.AQMOUNT and string.find(zone,"Ahn'Qiraj") then
+	-- 	if string.find(name, "Blue Qiraji Resonating") or string.find(name, "Green Qiraji Resonating") or string.find(name, "Yellow Qiraji Resonating") then
+	-- 		cfg = LPCONFIG.AQMOUNT
+	-- 		RollOnLoot(id, LPCONFIG.AQMOUNT);
+	-- 	end
+	-- end
 
 	if LPCONFIG.SAND then
 		if string.find(name ,"Corrupted Sand") then
@@ -994,19 +977,19 @@ function LazyPig_AutoRoll(id)
 		end
 	end
 
-	if LPCONFIG.NAXX and zone == "Naxxramas" then
-		if string.find(name, "Wartorn") or string.find(name, "Thawing") then
-			cfg = LPCONFIG.NAXX
-			RollOnLoot(id, LPCONFIG.NAXX);
-		end
-	end
+	-- if LPCONFIG.NAXX and zone == "Naxxramas" then
+	-- 	if string.find(name, "Wartorn") or string.find(name, "Thawing") then
+	-- 		cfg = LPCONFIG.NAXX
+	-- 		RollOnLoot(id, LPCONFIG.NAXX);
+	-- 	end
+	-- end
 
-	if LPCONFIG.BWL and string.find(zone, "Blackwing") then
-		if string.find(name, "Hourglass Sand") or string.find(name, "Elementium Ore") then
-			cfg = LPCONFIG.BWL
-			RollOnLoot(id, LPCONFIG.BWL)
-		end
-	end
+	-- if LPCONFIG.BWL and string.find(zone, "Blackwing") then
+	-- 	if string.find(name, "Hourglass Sand") or string.find(name, "Elementium Ore") then
+	-- 		cfg = LPCONFIG.BWL
+	-- 		RollOnLoot(id, LPCONFIG.BWL)
+	-- 	end
+	-- end
 
 	-- Hard coded auto need for Necrotic Runes
 	if string.find(name, "Necrotic Rune") then
@@ -1014,24 +997,24 @@ function LazyPig_AutoRoll(id)
 		RollOnLoot(id, 1);
 	end
 
-	-- Config for "White" tailoring items (Cloth, Spider Silk)
-	if LPCONFIG.WHITE_TAILORING and quality == 1 and (string.find(name, "loth") or string.find(name, "Silk")) then
-		cfg = LPCONFIG.WHITE_TAILORING
-		RollOnLoot(id, LPCONFIG.WHITE_TAILORING)
-	end
+	-- -- Config for "White" tailoring items (Cloth, Spider Silk)
+	-- if LPCONFIG.WHITE_TAILORING and quality == 1 and (string.find(name, "loth") or string.find(name, "Silk")) then
+	-- 	cfg = LPCONFIG.WHITE_TAILORING
+	-- 	RollOnLoot(id, LPCONFIG.WHITE_TAILORING)
+	-- end
 
 	-- Config for Food and Drink
-	if LPCONFIG.FOOD_AND_DRINK and quality == 1 then
-		local itemLink = GetLootRollItemLink(id);
-		local found, _, itemIdFromLink, _ = string.find(itemLink, "item:(%d+):.*%[(.*)%]")
-		if found and itemIdFromLink then
-			local _,_,_,_,_,itemType,subType = GetItemInfo(tonumber(itemIdFromLink))
-			if itemType == "Consumable" and subType==20 then
-				cfg = LPCONFIG.FOOD_AND_DRINK
-				RollOnLoot(id, LPCONFIG.FOOD_AND_DRINK)
-			end
-		end
-	end
+	-- if LPCONFIG.FOOD_AND_DRINK and quality == 1 then
+	-- 	local itemLink = GetLootRollItemLink(id);
+	-- 	local found, _, itemIdFromLink, _ = string.find(itemLink, "item:(%d+):.*%[(.*)%]")
+	-- 	if found and itemIdFromLink then
+	-- 		local _,_,_,_,_,itemType,subType = GetItemInfo(tonumber(itemIdFromLink))
+	-- 		if itemType == "Consumable" and subType==20 then
+	-- 			cfg = LPCONFIG.FOOD_AND_DRINK
+	-- 			RollOnLoot(id, LPCONFIG.FOOD_AND_DRINK)
+	-- 		end
+	-- 	end
+	-- end
 
 	if LPCONFIG.ES_SHARDS and string.find(zone, "Emerald Sanctum") then
 		if string.find(name, "Dreamscale") or string.find(name, "Fading Dream Fragment") or string.find(name, "Small Dream Shard") then
@@ -1730,19 +1713,6 @@ function ScheduleItemSplit(sbag, sslot, dbag, dslot, count)
 	end
 end
 
-function LazyPig_RefreshNameplates()
-	if LPCONFIG.EPLATE then
-		ShowNameplates();
-	elseif LPCONFIG.HPLATE then
-		HideNameplates();
-	end
-	if LPCONFIG.FPLATE then
-		ShowFriendNameplates();
-	elseif LPCONFIG.HPLATE then
-		HideFriendNameplates();
-	end
-end
-
 function LazyPig_RollLootOpen()
 	for i=1,STATICPOPUP_NUMDIALOGS do
 		local frame = _G["StaticPopup"..i]
@@ -1893,6 +1863,15 @@ function LazyPig_CheckSalvation()
 	end
 end
 
+function LazyPig_RefreshCamera()
+	if LPCONFIG.CAM then
+		SetCVar("cameraDistanceMax", 50)
+	else
+		SetCVar("cameraDistanceMaxFactor", 1)
+		SetCVar("cameraDistanceMax", 15)
+	end
+end
+
 local manabuffs = {
 	"Spell_Holy_SealOfWisdom",
 	"Spell_Holy_GreaterBlessingofWisdom",
@@ -1928,26 +1907,6 @@ function LazyPig_CheckManaBuffs()
 		end
 		counter = counter + 1
 	end
-end
-
-function LazyPig_ShowBindings(bind, fs, desc)
-	local bind1, bind2 = GetBindingKey(bind)
-	local fsl = _G[fs]
-
-	local printout = nil
-	if bind1 and bind2 then
-		printout = "[" .. bind1 .. "/" .. bind2 .. "]"
-	elseif bind1 then
-		printout = "[" .. bind1 .. "]"
-	elseif bind2 then
-		printout = "[" .. bind2 .. "]"
-	elseif desc then
-		printout = "[" .. desc .. "]"
-	else
-		printout = "none"
-		fsl:SetTextColor(1,1,1,1)
-	end
-	fsl:SetText(printout)
 end
 
 function LazyPig_ChatFrame_OnEvent(event)
@@ -1991,6 +1950,8 @@ function LazyPig_ChatFrame_OnEvent(event)
 	if LPCONFIG.SPAM and event == "CHAT_MSG_SAY" and string.find(arg1 or "" ,"^Casted %u[%a%s]+ on %u[%a%s]+") then
         return
     end
+
+	-- TODO: supress #showtooltip spam
 
 	Original_ChatFrame_OnEvent(event);
 end
