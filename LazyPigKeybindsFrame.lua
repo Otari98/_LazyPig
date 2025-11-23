@@ -3,8 +3,8 @@ local _G = _G or getfenv(0)
 local FontstringTables = {
 	["Non-Configurable Keys"] = {
 		[0] = "LazyPigNCE",
-		[1] = { "LazyPig_kbfs000", "Sell Grey Items/Repairs:", "Hold Shift Key while Merchant's window is open" },
-		[2] = { "LazyPig_kbfs001", "Repeatable Quest Auto-Complete:", "Hold Shift Key and finish quest once to record the steps." },
+		[1] = { "LazyPig_kbfs000", "Sell Grey Items/Repairs:", "Hold Alt Key while Merchant's window is open" },
+		[2] = { "LazyPig_kbfs001", "Repeatable Quest Auto-Complete:", "Hold Alt Key and finish quest once to record the steps." },
 		[3] = { "LazyPig_kbfs002", "Quest Auto-PickUp/Auto-Complete:", "Hold Alt Key to Pickup/Complete quests." },
 	},
 
@@ -98,13 +98,10 @@ end
 function LazyPig_CreateKeybindsFrame()
 	-- Keybinds Frame
 	local frame = CreateFrame("Frame", "LazyPigKeybindsFrame", LazyPigOptionsFrame)
-	-- tinsert(UISpecialFrames,"LazyPigKeybindsFrame")
-	frame:SetScale(1)
 	frame:SetWidth(600)
 	frame:SetHeight(175)
 	frame:SetFrameLevel(LazyPigOptionsFrame:GetFrameLevel() + 2)
 	frame:SetPoint("TOP", LazyPigOptionsFrame, "BOTTOM", 0, 10)
-
 	frame:SetBackdrop({
 		bgFile = "Interface\\Buttons\\WHITE8x8",
 		edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
@@ -114,12 +111,9 @@ function LazyPig_CreateKeybindsFrame()
 		insets = { left = 11, right = 12, top = 12, bottom = 11 }
 	})
 	frame:SetBackdropColor(0, 0, 0, .8)
-
-	-- frame:SetMovable(true)
+	frame:SetMovable(true)
 	frame:EnableMouse(true)
-	-- frame:SetClampedToScreen(false)
-	-- frame:RegisterForDrag("LeftButton")
-
+	frame:RegisterForDrag("LeftButton")
 	frame:Hide()
 	frame:SetScript("OnShow", function()
 		ShowBindings("LOGOUT", "LP_KB1", "CTRL+ALT+SHIFT")
@@ -128,24 +122,24 @@ function LazyPig_CreateKeybindsFrame()
 		ShowBindings("DUEL", "LP_KB4")
 		ShowBindings("WSGDROP", "LP_KB5")
 	end)
-	-- frame:SetScript("OnMouseDown", function()
-	-- 	if arg1 == "LeftButton" and not this.isMoving then
-	-- 		this:StartMoving();
-	-- 		this.isMoving = true;
-	-- 	end
-	-- end)
-	-- frame:SetScript("OnMouseUp", function()
-	-- 	if arg1 == "LeftButton" and this.isMoving then
-	-- 		this:StopMovingOrSizing();
-	-- 		this.isMoving = false;
-	-- 	end
-	-- end)
-	-- frame:SetScript("OnHide", function()
-	-- 	if this.isMoving then
-	-- 		this:StopMovingOrSizing();
-	-- 		this.isMoving = false;
-	-- 	end
-	-- end)
+	frame:SetScript("OnMouseDown", function()
+		if arg1 == "LeftButton" and not LazyPigOptionsFrame.isMoving then
+			LazyPigOptionsFrame:StartMoving()
+			LazyPigOptionsFrame.isMoving = true
+		end
+	end)
+	frame:SetScript("OnMouseUp", function()
+		if arg1 == "LeftButton" and LazyPigOptionsFrame.isMoving then
+			LazyPigOptionsFrame:StopMovingOrSizing()
+			LazyPigOptionsFrame.isMoving = false
+		end
+	end)
+	frame:SetScript("OnHide", function()
+		if LazyPigOptionsFrame.isMoving then
+			LazyPigOptionsFrame:StopMovingOrSizing()
+			LazyPigOptionsFrame.isMoving = false
+		end
+	end)
 
 	-- MenuTitle Frame
 	local texture_title = frame:CreateTexture("LazyPigKeybindsFrameTitle")

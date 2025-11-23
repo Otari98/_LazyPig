@@ -6,35 +6,29 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 	<Frame name="LazyPig">	
 		<Scripts>
 			<OnLoad>
-				LazyPig_OnLoad();
+				LazyPig_OnLoad()
 			</OnLoad>
 			<OnEvent>
-				 LazyPig_OnEvent(event);
+				LazyPig_OnEvent(event)
 			</OnEvent>
 			<OnUpdate>
-				LazyPig_OnUpdate();
+				LazyPig_OnUpdate()
 			</OnUpdate>
 		</Scripts>
 		<Anchors>
 			<Anchor point="TOP" relativeTo="PVPArenaTextString" relativePoint="BOTTOM" />
 		</Anchors>
-		<Size>
-			<AbsDimension x="256" y="256"/>
-		</Size>
+		<Size x="256" y="256"/>
 		<Layers>
 			<Layer level="ARTWORK">		
 				<FontString name="LazyPigText" font="Fonts\FRIZQT__.TTF" outline="THICK" hidden="true">
-					<Size>
-						<AbsDimension x="512" y="0"/>
-					</Size>
+					<Size x="512" y="0"/>
 					<Anchors>
 						<Anchor point="CENTER">
-							<Offset><AbsDimension x="-50" y="90"/></Offset>
+							<Offset x="" y="90"/>
 						</Anchor>
 					</Anchors>
-					<FontHeight>
-						<AbsValue val="18"/>
-					</FontHeight>
+					<FontHeight val="18"/>
 				</FontString>	
 			</Layer>
 		</Layers>
@@ -42,7 +36,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 	<GameTooltip name="LazyPig_Buff_Tooltip" hidden="true" inherits="GameTooltipTemplate">
 		<Scripts>
 			<OnLoad>
-				this:SetOwner(this, "ANCHOR_NONE");
+				this:SetOwner(this, "ANCHOR_NONE")
 			</OnLoad>
 		</Scripts>
 	</GameTooltip>

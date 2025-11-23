@@ -922,175 +922,208 @@ function LazyPig_BagReturn(find)
 	return nil
 end
 
-local RollReturn = function(config)
+local function RollToString(roll)
 	local txt = ""
-	if config == 1 then
-		txt = "NEED"
-	elseif config == 2 then
-		txt = "GREED"
-	elseif config == 0 then
-		txt = "PASS"
+	if roll == 1 then
+		txt = string.upper(NEED)
+	elseif roll == 2 then
+		txt = string.upper(GREED)
+	elseif roll == 0 then
+		txt = string.upper(PASS)
 	end
 	return txt
 end
 
--- TODO: rewrite to use itemID instead
+local ZGloot = {
+	[19698] = "Zulian Coin",
+	[19699] = "Razzashi Coin",
+	[19700] = "Hakkari Coin",
+	[19701] = "Gurubashi Coin",
+	[19702] = "Vilebranch Coin",
+	[19703] = "Witherbark Coin",
+	[19704] = "Sandfury Coin",
+	[19705] = "Skullsplitter Coin",
+	[19706] = "Bloodscalp Coin",
+	[19707] = "Red Hakkari Bijou",
+	[19708] = "Blue Hakkari Bijou",
+	[19709] = "Yellow Hakkari Bijou",
+	[19710] = "Orange Hakkari Bijou",
+	[19711] = "Green Hakkari Bijou",
+	[19712] = "Purple Hakkari Bijou",
+	[19713] = "Bronze Hakkari Bijou",
+	[19714] = "Silver Hakkari Bijou",
+	[19715] = "Gold Hakkari Bijou",
+}
+
+local MCloot = {
+	[11382] = "Blood of the Mountain",
+	[17010] = "Fiery Core",
+	[17011] = "Lava Core",
+}
+
+local AQloot = {
+	[20858] = "Stone Scarab",
+	[20859] = "Gold Scarab",
+	[20860] = "Silver Scarab",
+	[20861] = "Bronze Scarab",
+	[20862] = "Crystal Scarab",
+	[20863] = "Clay Scarab",
+	[20864] = "Bone Scarab",
+	[20865] = "Ivory Scarab",
+	[20866] = "Azure Idol",
+	[20867] = "Onyx Idol",
+	[20868] = "Lambent Idol",
+	[20869] = "Amber Idol",
+	[20870] = "Jasper Idol",
+	[20871] = "Obsidian Idol",
+	[20872] = "Vermillion Idol",
+	[20873] = "Alabaster Idol",
+	[20874] = "Idol of the Sun",
+	[20875] = "Idol of Night",
+	[20876] = "Idol of Death",
+	[20877] = "Idol of the Sage",
+	[20878] = "Idol of Rebirth",
+	[20879] = "Idol of Life",
+	[20881] = "Idol of Strife",
+	[20882] = "Idol of War",
+}
+
+local BMloot = {
+	[50203] = "Corrupted Sand",
+}
+
+local ESloot = {
+	[20381] = "Dreamscale",
+	[61197] = "Fading Dream Fragment",
+	[61198] = "Small Dream Shard",
+}
+
 function LazyPig_AutoRoll(id)
-	local cfg = 0
-	local zone = GetRealZoneText()
-	local _, name, _, quality = GetLootRollItemInfo(id)
-
-	if LPCONFIG.ZG and zone == "Zul'Gurub" then
-		if string.find(name, "Hakkari Bijou") or string.find(name, "Coin") then
-			cfg = LPCONFIG.ZG
-			RollOnLoot(id, LPCONFIG.ZG);
-		end
+	local roll = nil
+	local _, _, _, quality = GetLootRollItemInfo(id)
+	local link = GetLootRollItemLink(id)
+	local _, _, itemID = strfind(link or "", "item:(%d+)")
+	itemID = tonumber(itemID)
+	
+	if not itemID then
+		return
+	end
+	
+	if LPCONFIG.ZG and ZGloot[itemID] then
+		roll = LPCONFIG.ZG
+		RollOnLoot(id, LPCONFIG.ZG)
 	end
 
-	if LPCONFIG.MC and zone == "Molten Core" then
-		if string.find(name, "Fiery Core") or string.find(name, "Lava Core") or string.find(name, "Blood of the Mountain") then
-			cfg = LPCONFIG.MC
-			RollOnLoot(id, LPCONFIG.MC);
-		end
+	if LPCONFIG.MC and MCloot[itemID] then
+		roll = LPCONFIG.MC
+		RollOnLoot(id, LPCONFIG.MC)
 	end
 
-	if LPCONFIG.AQ and string.find(zone,"Ahn'Qiraj") then
-		if not string.find(name, "Scarab Brooch") and not string.find(name, "Petrified Scarab") then
-			if string.find(name, "Scarab") or string.find(name, "Idol") then
-				cfg = LPCONFIG.AQ
-				RollOnLoot(id, LPCONFIG.AQ);
-			end
-		end
+	if LPCONFIG.AQ and AQloot[itemID] then
+		roll = LPCONFIG.AQ
+		RollOnLoot(id, LPCONFIG.AQ)
 	end
 
-	-- if LPCONFIG.AQMOUNT and string.find(zone,"Ahn'Qiraj") then
-	-- 	if string.find(name, "Blue Qiraji Resonating") or string.find(name, "Green Qiraji Resonating") or string.find(name, "Yellow Qiraji Resonating") then
-	-- 		cfg = LPCONFIG.AQMOUNT
-	-- 		RollOnLoot(id, LPCONFIG.AQMOUNT);
-	-- 	end
-	-- end
-
-	if LPCONFIG.SAND then
-		if string.find(name ,"Corrupted Sand") then
-			cfg = LPCONFIG.SAND
-			RollOnLoot(id, LPCONFIG.SAND);
-		end
+	if LPCONFIG.SAND and BMloot[itemID] then
+		roll = LPCONFIG.SAND
+		RollOnLoot(id, LPCONFIG.SAND)
 	end
-
-	-- if LPCONFIG.NAXX and zone == "Naxxramas" then
-	-- 	if string.find(name, "Wartorn") or string.find(name, "Thawing") then
-	-- 		cfg = LPCONFIG.NAXX
-	-- 		RollOnLoot(id, LPCONFIG.NAXX);
-	-- 	end
-	-- end
-
-	-- if LPCONFIG.BWL and string.find(zone, "Blackwing") then
-	-- 	if string.find(name, "Hourglass Sand") or string.find(name, "Elementium Ore") then
-	-- 		cfg = LPCONFIG.BWL
-	-- 		RollOnLoot(id, LPCONFIG.BWL)
-	-- 	end
-	-- end
 
 	-- Hard coded auto need for Necrotic Runes
-	if string.find(name, "Necrotic Rune") then
-		cfg = 1
-		RollOnLoot(id, 1);
+	if itemID == 22484 then
+		roll = 1
+		RollOnLoot(id, 1)
 	end
 
-	-- -- Config for "White" tailoring items (Cloth, Spider Silk)
-	-- if LPCONFIG.WHITE_TAILORING and quality == 1 and (string.find(name, "loth") or string.find(name, "Silk")) then
-	-- 	cfg = LPCONFIG.WHITE_TAILORING
-	-- 	RollOnLoot(id, LPCONFIG.WHITE_TAILORING)
-	-- end
-
-	-- Config for Food and Drink
-	-- if LPCONFIG.FOOD_AND_DRINK and quality == 1 then
-	-- 	local itemLink = GetLootRollItemLink(id);
-	-- 	local found, _, itemIdFromLink, _ = string.find(itemLink, "item:(%d+):.*%[(.*)%]")
-	-- 	if found and itemIdFromLink then
-	-- 		local _,_,_,_,_,itemType,subType = GetItemInfo(tonumber(itemIdFromLink))
-	-- 		if itemType == "Consumable" and subType==20 then
-	-- 			cfg = LPCONFIG.FOOD_AND_DRINK
-	-- 			RollOnLoot(id, LPCONFIG.FOOD_AND_DRINK)
-	-- 		end
-	-- 	end
-	-- end
-
-	if LPCONFIG.ES_SHARDS and string.find(zone, "Emerald Sanctum") then
-		if string.find(name, "Dreamscale") or string.find(name, "Fading Dream Fragment") or string.find(name, "Small Dream Shard") then
-			cfg = LPCONFIG.ES_SHARDS
-			RollOnLoot(id, LPCONFIG.ES_SHARDS)
-		end
+	if LPCONFIG.ES_SHARDS and ESloot[itemID] then
+		roll = LPCONFIG.ES_SHARDS
+		RollOnLoot(id, LPCONFIG.ES_SHARDS)
 	end
 
-	if LPCONFIG.ROLLMSG and type(cfg) == "number" then
+	if LPCONFIG.ROLLMSG and type(roll) == "number" then
 		local _, _, _, hex = GetItemQualityColor(quality)
-		DEFAULT_CHAT_FRAME:AddMessage("LazyPig: Auto "..hex..RollReturn(cfg).." "..GetLootRollItemLink(id))
+		DEFAULT_CHAT_FRAME:AddMessage("LazyPig: Auto "..hex..RollToString(roll).." "..GetLootRollItemLink(id))
 	end
 
 	-- Auto accept BoP for things that are auto rolled. Like Corrupted Sand and Necrotic Runes
 	for i=1,STATICPOPUP_NUMDIALOGS do
 		local frame = _G["StaticPopup"..i]
-		if frame:IsShown() and frame.which ~= "DEATH" then
-			_G["StaticPopup"..i.."Button1"]:Click();
+		if frame:IsShown() and frame.which == "CONFIRM_LOOT_ROLL" and frame.data == id and frame.data2 == roll then
+			_G["StaticPopup"..i.."Button1"]:Click()
 		end
 	end
 end
 
 function LazyPig_GreenRoll()
+	if not LPCONFIG.GREEN then
+		return
+	end
 	local pass = nil
-	if LPCONFIG.GREEN then
-		for i=1, NUM_GROUP_LOOT_FRAMES do
-			local frame = _G["GroupLootFrame"..i];
-			if frame:IsVisible() then
-				local id = frame.rollID
-				local _, name, _, quality = GetLootRollItemInfo(id);
-				if quality == 2 then
-					RollOnLoot(id, LPCONFIG.GREEN);
-					local _, _, _, hex = GetItemQualityColor(quality)
-					greenrolltime = GetTime() + 1
-					DEFAULT_CHAT_FRAME:AddMessage("LazyPig: "..hex..RollReturn(LPCONFIG.GREEN).."|cffffffff Roll "..GetLootRollItemLink(id))
-					pass = true
+	for i=1, NUM_GROUP_LOOT_FRAMES do
+		local frame = _G["GroupLootFrame"..i];
+		if frame:IsVisible() then
+			local id = frame.rollID
+			local _, name, _, quality = GetLootRollItemInfo(id);
+			if quality == 2 then
+				RollOnLoot(id, LPCONFIG.GREEN);
+				local _, _, _, hex = GetItemQualityColor(quality)
+				greenrolltime = GetTime() + 1
+				if LPCONFIG.ROLLMSG then
+					DEFAULT_CHAT_FRAME:AddMessage("LazyPig: Auto "..hex..RollToString(LPCONFIG.GREEN).." "..GetLootRollItemLink(id))
 				end
+				pass = true
 			end
 		end
 	end
 	return pass
 end
 
-function LazyPig_GreySellRepair()
-	local bag, slot = LazyPig_BagReturn("ff9d9d9d")
-	if bag and slot then
-		local _, _, locked = GetContainerItemInfo(bag, slot)
-		if bag and slot and not locked then
-			UseContainerItem(bag,slot)
-			if not(GreySell.bag == bag and GreySell.slot == slot) then
-				DEFAULT_CHAT_FRAME:AddMessage("LazyPig: Selling "..GetContainerItemLink(bag, slot))
-				GreySell.bag = bag
-				GreySell.slot = slot
-			end
-		end
-	elseif CanMerchantRepair() then
-		local rcost = GetRepairAllCost()
-		if rcost and rcost ~= 0 then
-			if rcost > GetMoney() then
-				DEFAULT_CHAT_FRAME:AddMessage("LazyPig: Not Enough Money to Repair")
-				return
-			end
-			GreySell.repair = rcost
-			RepairAllItems();
-		elseif GreySell.repair and	rcost == 0 then
-			local gold = floor(abs(GreySell.repair / 10000))
-			local silver = floor(abs(mod(GreySell.repair / 100, 100)))
-			local copper = floor(abs(mod(GreySell.repair, 100)))
-			local COLOR_COPPER = "|cffeda55f"
-			local COLOR_SILVER = "|cffc7c7cf"
-			local COLOR_GOLD = "|cffffd700"
+local COLOR_COPPER = "|cffeda55f"
+local COLOR_SILVER = "|cffc7c7cf"
+local COLOR_GOLD = "|cffffd700"
 
-			DEFAULT_CHAT_FRAME:AddMessage("LazyPig: Repairing All Items "..COLOR_GOLD..gold.."g "..COLOR_SILVER..silver.."s "..COLOR_COPPER..copper.."c")
-			GreySell.repair = nil
+local function MoneyToString(money)
+	if not money then
+		return ""
+	end
+	local gold = floor(abs(money / 10000))
+	local silver = floor(abs(mod(money / 100, 100)))
+	local copper = floor(abs(mod(money, 100)))
+	return COLOR_GOLD..gold.."g|r "..COLOR_SILVER..silver.."s|r "..COLOR_COPPER..copper.."c|r"
+end
+
+function LazyPig_GreySellRepair()
+	local i = 0
+	for bag = 0, NUM_BAG_FRAMES do
+		for slot = 1, GetContainerNumSlots(bag) do
+			local link = GetContainerItemLink(bag, slot)
+			local _, _, locked = GetContainerItemInfo(bag, slot)
+			local _, _, id = string.find(link or "", "item:(%d+)")
+			id = tonumber(id)
+			local _, _, quality = GetItemInfo(id or 0)
+			if quality and quality == 0 and not locked then
+				UseContainerItem(bag, slot)
+				i = i + 1
+				if i > 4 then
+					bag = NUM_BAG_FRAMES
+					break
+				end
+			end
 		end
 	end
+	if not CanMerchantRepair() then
+		return
+	end
+	local rcost = GetRepairAllCost()
+	if rcost == 0 then
+		return
+	end
+	if rcost > GetMoney() then
+		DEFAULT_CHAT_FRAME:AddMessage("LazyPig: Not enough money to repair")
+		return
+	end
+	RepairAllItems()
+	DEFAULT_CHAT_FRAME:AddMessage("LazyPig: Repaired all items for "..MoneyToString(rcost))
 end
 
 function LazyPig_ProcessQuests(...)
