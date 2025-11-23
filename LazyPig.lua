@@ -97,7 +97,6 @@ local ScheduleFunction = {}
 local QuestRecord = {}
 local ActiveQuest = {}
 local AvailableQuest = {}
-local GreySell = {}
 local ChatMessage = {{}, {}, INDEX = 1}
 local ScheduleSplit = {}
 local ScheduleSplitCount = {}
@@ -501,7 +500,6 @@ function LazyPig_OnEvent(event)
 
 	elseif event == "MERCHANT_SHOW" then
 		merchantstatus = true
-		GreySell = twipe(GreySell)
 
 	elseif event == "MERCHANT_CLOSED" then
 		merchantstatus = false
