@@ -159,12 +159,8 @@ function LazyPig_CreateKeybindsFrame()
 
 	local st = "Non-Configurable Keys"
 	frame.fsgroup_NCE = FontstringGroup(frame, 20, -25, st, FontstringTables[st], {1, .81, 0}, {1, 1, 1})
-
-	local st = "Special Key-Combinations"
+	st = "Special Key-Combinations"
 	frame.fsgroup_SKCB = FontstringGroup(frame, 20, -85, st, FontstringTables[st], {1, .81, 0}, {.8, .1, .1})
-
-	local st = "Configurable Keys"
+	st = "Configurable Keys"
 	frame.fsgroup_CKB = FontstringGroup(frame, 255, -85, st, FontstringTables[st], {1, .81, 0}, {.8, .1, .1}, true)
-
-	return frame
 end

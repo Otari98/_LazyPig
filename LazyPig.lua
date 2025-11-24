@@ -9,24 +9,24 @@ LPCONFIG.GINV = true               -- Auto accept invites from guild members
 LPCONFIG.FINV = true               -- Auto accept invites from friends
 LPCONFIG.SINV = false              -- Auto accept invites from strangers
 LPCONFIG.DINV = true               -- Disable auto accept invite whiel in bg or in bg queue
-LPCONFIG.SUMM = true               -- Auto accept summons
+LPCONFIG.SUMM = false              -- Auto accept summons
 LPCONFIG.EBG = true                -- Auto join battleground
 LPCONFIG.LBG = true                -- Auto leave battleground
 LPCONFIG.QBG = true                -- Auto queue battleground
 LPCONFIG.RBG = true                -- Auto release spirit in battleground
 LPCONFIG.SBG = false               -- Auto decline quest sharing while in battleground
-LPCONFIG.AQUE = true               -- Announce when queueing for battleground as party leader
-LPCONFIG.LOOT = true               -- Position loot frame at cursor
+LPCONFIG.AQUE = false              -- Announce when queueing for battleground as party leader
+LPCONFIG.LOOT = false              -- Position loot frame at cursor
 LPCONFIG.RIGHT = true              -- Improved right click
-LPCONFIG.GREEN = 2                 -- Auto roll on green items
-LPCONFIG.ZG = 1                    -- ZG coins/bijou auto roll
-LPCONFIG.MC = 1                    -- MC mats auto roll
-LPCONFIG.AQ = 1                    -- AQ scarabs/idols auto roll
-LPCONFIG.SAND = 1                  -- Corrupted sand auto roll
-LPCONFIG.ES_SHARDS = 0             -- Dream Shrads auto roll
-LPCONFIG.ROLLMSG = true            -- Lazy Pig Auto Roll Messages
+LPCONFIG.GREEN = nil               -- [number or nil] Auto roll on green items
+LPCONFIG.ZG = 1                    -- [number or nil] ZG coins/bijou auto roll
+LPCONFIG.MC = nil                  -- [number or nil] MC mats auto roll
+LPCONFIG.AQ = nil                  -- [number or nil] AQ scarabs/idols auto roll
+LPCONFIG.SAND = 1                  -- [number or nil] Corrupted sand auto roll
+LPCONFIG.ES_SHARDS = nil           -- [number or nil] Dream Shrads auto roll
+LPCONFIG.ROLLMSG = false           -- Lazy Pig Auto Roll Messages
 LPCONFIG.DUEL = false              -- Auto cancel duels
-LPCONFIG.SPECIALKEY = true         -- Special key combinations
+LPCONFIG.SPECIALKEY = false        -- Special key combinations
 LPCONFIG.WORLDDUNGEON = false      -- Mute Wolrd chat while in dungeons
 LPCONFIG.WORLDRAID = false         -- Mute Wolrd chat while in raid
 LPCONFIG.WORLDBG = false           -- Mute Wolrd chat while in battleground
@@ -35,9 +35,9 @@ LPCONFIG.SPAM = false              -- Hide players spam messages
 LPCONFIG.SPAM_UNCOMMON = false     -- Hide green items roll messages
 LPCONFIG.SPAM_RARE = false         -- Hide blue items roll messages
 LPCONFIG.SHIFTSPLIT = false        -- Improved stack splitting with shift
-LPCONFIG.REZ = true                -- Auto accept resurrection while in raid, dungeon or bg if resurrecter is out of combat
+LPCONFIG.REZ = false               -- Auto accept resurrection while in raid, dungeon or bg if resurrecter is out of combat
 LPCONFIG.GOSSIP = true             -- Auto proccess gossip
-LPCONFIG.SALVA = nil               -- Autoremove Blessing of Salvation
+LPCONFIG.SALVA = nil               -- [number or nil] Autoremove Blessing of Salvation
 LPCONFIG.REMOVEMANABUFFS = false   -- Autoremove Blessing of Wisdom, Arcane Intellect, Prayer of Spirit
 
 BINDING_HEADER_LP_HEADER = "_LazyPig";
@@ -152,20 +152,49 @@ function LazyPig_OnLoad()
 	SLASH_LAZYPIG2 = "/lazypig";
 	SlashCmdList["LAZYPIG"] = LazyPig_Command;
 
-	this:RegisterEvent("ADDON_LOADED");
+	this:RegisterEvent("ADDON_LOADED")
 	this:RegisterEvent("PLAYER_LOGIN")
-	--this:RegisterEvent("PLAYER_ENTERING_WORLD")
+	this:RegisterEvent("CHAT_MSG")
+	this:RegisterEvent("CHAT_MSG_SYSTEM")
+	this:RegisterEvent("PARTY_INVITE_REQUEST")
+	this:RegisterEvent("CONFIRM_SUMMON")
+	this:RegisterEvent("RESURRECT_REQUEST")
+	this:RegisterEvent("UPDATE_BATTLEFIELD_STATUS")
+	this:RegisterEvent("CHAT_MSG_BG_SYSTEM_ALLIANCE")
+	this:RegisterEvent("CHAT_MSG_BG_SYSTEM_HORDE")
+	this:RegisterEvent("CHAT_MSG_BG_SYSTEM_NEUTRAL")
+	this:RegisterEvent("BATTLEFIELDS_SHOW")
+	this:RegisterEvent("GOSSIP_SHOW")
+	this:RegisterEvent("QUEST_GREETING")
+	this:RegisterEvent("UI_ERROR_MESSAGE")
+	this:RegisterEvent("QUEST_PROGRESS")
+	this:RegisterEvent("QUEST_COMPLETE")
+	this:RegisterEvent("START_LOOT_ROLL")
+	this:RegisterEvent("DUEL_REQUESTED")
+	this:RegisterEvent("MERCHANT_SHOW")
+	this:RegisterEvent("MERCHANT_CLOSED")
+	this:RegisterEvent("TRADE_SHOW")
+	this:RegisterEvent("TRADE_CLOSED")
+	this:RegisterEvent("MAIL_SHOW")
+	this:RegisterEvent("MAIL_CLOSED")
+	this:RegisterEvent("AUCTION_HOUSE_SHOW")
+	this:RegisterEvent("AUCTION_HOUSE_CLOSED")
+	this:RegisterEvent("BANKFRAME_OPENED")
+	this:RegisterEvent("BANKFRAME_CLOSED")
+	this:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+	this:RegisterEvent("PLAYER_UNGHOST")
+	this:RegisterEvent("PLAYER_DEAD")
+	this:RegisterEvent("PLAYER_AURAS_CHANGED")
+	this:RegisterEvent("UPDATE_BONUS_ACTIONBAR")
+	this:RegisterEvent("UNIT_INVENTORY_CHANGED")
+	this:RegisterEvent("UI_INFO_MESSAGE")
 end
 
 function LazyPig_Command()
 	if LazyPigOptionsFrame:IsShown() then
 		LazyPigOptionsFrame:Hide()
-		LazyPigKeybindsFrame:Hide()
 	else
 		LazyPigOptionsFrame:Show()
-		if LazyPigOptionsFrameKeibindsButton:GetText() == "Hide Keybinds" then
-			LazyPigKeybindsFrame:Show()
-		end
 	end
 end
 
@@ -219,7 +248,10 @@ function LazyPig_OnUpdate()
 	if LPCONFIG.SPECIALKEY then
 		if ctrlstatus and shiftstatus and altstatus and current_time > delayaction then
 			delayaction = current_time + 1
-			Logout();
+			local bind1, bind2 =  GetBindingKey("LOGOUT")
+			if not bind1 and not bind2 then
+				Logout();
+			end
 		elseif ctrlstatus and not shiftstatus and altstatus and not auctionstatus and not mailstatus and current_time > delayaction then
 			if tradestatus then
 				AcceptTrade();
@@ -319,13 +351,10 @@ function LazyPig_OnUpdate()
 		LazyPig_AutoSummon();
 	end
 
-	LazyPig_CheckSalvation();
-	LazyPig_CheckManaBuffs();
 	ScheduleButtonClick();
 	ScheduleFunctionLaunch();
 	ScheduleItemSplit();
 	LazyPig_WatchSplit();
-
 end
 
 function ScheduleButtonClick(button, delay)
@@ -385,49 +414,13 @@ local ErrorStanding = {
 function LazyPig_OnEvent(event)
 	if event == "ADDON_LOADED" and arg1 == "_LazyPig" then
 		this:UnregisterEvent("ADDON_LOADED")
-		local LP_TITLE = GetAddOnMetadata("_LazyPig", "Title")
-		local LP_VERSION = GetAddOnMetadata("_LazyPig", "Version")
-		local LP_AUTHOR = GetAddOnMetadata("_LazyPig", "Author")
+		local title = GetAddOnMetadata("_LazyPig", "Title")
+		local version = GetAddOnMetadata("_LazyPig", "Version")
+		DEFAULT_CHAT_FRAME:AddMessage(title.." v"..version.."|cffffffff".." loaded, type".."|cff00eeee".." /lp".."|cffffffff for options")
 
-		DEFAULT_CHAT_FRAME:AddMessage(LP_TITLE .. " v" .. LP_VERSION .. " by " .."|cffFF0066".. LP_AUTHOR .."|cffffffff".. " loaded, type".."|cff00eeee".." /lp".."|cffffffff for options")
 	elseif event == "PLAYER_LOGIN" then
-		this:RegisterEvent("CHAT_MSG")
-		this:RegisterEvent("CHAT_MSG_SYSTEM")
-		this:RegisterEvent("PARTY_INVITE_REQUEST")
-		this:RegisterEvent("CONFIRM_SUMMON")
-		this:RegisterEvent("RESURRECT_REQUEST")
-		this:RegisterEvent("UPDATE_BATTLEFIELD_STATUS")
-		this:RegisterEvent("CHAT_MSG_BG_SYSTEM_ALLIANCE")
-		this:RegisterEvent("CHAT_MSG_BG_SYSTEM_HORDE")
-		this:RegisterEvent("CHAT_MSG_BG_SYSTEM_NEUTRAL")
-		this:RegisterEvent("BATTLEFIELDS_SHOW")
-		this:RegisterEvent("GOSSIP_SHOW")
-		this:RegisterEvent("QUEST_GREETING")
-		this:RegisterEvent("UI_ERROR_MESSAGE")
-		this:RegisterEvent("QUEST_PROGRESS")
-		this:RegisterEvent("QUEST_COMPLETE")
-		this:RegisterEvent("START_LOOT_ROLL")
-		this:RegisterEvent("DUEL_REQUESTED")
-		this:RegisterEvent("MERCHANT_SHOW")
-		this:RegisterEvent("MERCHANT_CLOSED")
-		this:RegisterEvent("TRADE_SHOW")
-		this:RegisterEvent("TRADE_CLOSED")
-		this:RegisterEvent("MAIL_SHOW")
-		this:RegisterEvent("MAIL_CLOSED")
-		this:RegisterEvent("AUCTION_HOUSE_SHOW")
-		this:RegisterEvent("AUCTION_HOUSE_CLOSED")
-		this:RegisterEvent("BANKFRAME_OPENED")
-		this:RegisterEvent("BANKFRAME_CLOSED")
-		this:RegisterEvent("ZONE_CHANGED_NEW_AREA")
-		this:RegisterEvent("PLAYER_UNGHOST")
-		this:RegisterEvent("PLAYER_DEAD")
-		this:RegisterEvent("PLAYER_AURAS_CHANGED")
-		this:RegisterEvent("UPDATE_BONUS_ACTIONBAR")
-		this:RegisterEvent("UNIT_INVENTORY_CHANGED")
-		this:RegisterEvent("UI_INFO_MESSAGE")
-
-		LazyPigOptionsFrame = LazyPig_CreateOptionsFrame()
-		LazyPigKeybindsFrame = LazyPig_CreateKeybindsFrame()
+		LazyPig_CreateOptionsFrame()
+		LazyPig_CreateKeybindsFrame()
 
 		LazyPig_CheckSalvation();
 		LazyPig_CheckManaBuffs();
@@ -435,16 +428,19 @@ function LazyPig_OnEvent(event)
 		LazyPig_AutoLeaveBG();
 		LazyPig_AutoSummon();
 		ScheduleFunctionLaunch(LazyPig_ZoneCheck, 6);
-		ScheduleFunctionLaunch(LazyPig_ZoneCheck2, 7);
 		LazyPig_MailtoCheck();
 
-		if LPCONFIG.CAM then SetCVar("cameraDistanceMax",50) end
-		if LPCONFIG.LOOT then UIPanelWindows["LootFrame"] = nil end
+		if LPCONFIG.CAM then
+			SetCVar("cameraDistanceMax",50)
+		end
+		if LPCONFIG.LOOT then
+			UIPanelWindows["LootFrame"] = nil
+		end
 		QuestRecord["index"] = 0
 
-	elseif LPCONFIG.SALVA and (event == "UNIT_INVENTORY_CHANGED" or ((event == "PLAYER_AURAS_CHANGED" or event == "UPDATE_BONUS_ACTIONBAR") and LazyPig_PlayerClass("Druid", "player"))) then
+	elseif LPCONFIG.SALVA and (event == "UNIT_INVENTORY_CHANGED" or event == "PLAYER_AURAS_CHANGED" or (event == "UPDATE_BONUS_ACTIONBAR" and LazyPig_PlayerClass("Druid", "player"))) then
 		LazyPig_CheckSalvation()
-	elseif LPCONFIG.REMOVEMANABUFFS and (event == "UNIT_INVENTORY_CHANGED" or ((event == "PLAYER_AURAS_CHANGED" or event == "UPDATE_BONUS_ACTIONBAR") and LazyPig_PlayerClass("Druid", "player"))) then
+	elseif LPCONFIG.REMOVEMANABUFFS and (event == "UNIT_INVENTORY_CHANGED" or event == "PLAYER_AURAS_CHANGED" or (event == "UPDATE_BONUS_ACTIONBAR" and LazyPig_PlayerClass("Druid", "player"))) then
 		LazyPig_CheckManaBuffs()
 
 	elseif event == "DUEL_REQUESTED" then
@@ -470,7 +466,6 @@ function LazyPig_OnEvent(event)
 		end
 
 		ScheduleFunctionLaunch(LazyPig_ZoneCheck, 5)
-		ScheduleFunctionLaunch(LazyPig_ZoneCheck, 6)
 		--DEFAULT_CHAT_FRAME:AddMessage(event);
 
 	elseif event == "BANKFRAME_OPENED" then
@@ -1766,10 +1761,6 @@ function LazyPig_BindLootOpen()
 	return nil
 end
 
-function LazyPig_ZoneCheck2()
-	LazyPig_ZoneCheck()
-end
-
 local process = function(ChatFrame, name)
     for index, value in ChatFrame.channelList do
         if strupper(name) == strupper(value) then
@@ -1982,7 +1973,10 @@ function LazyPig_ChatFrame_OnEvent(event)
         return
     end
 
-	-- TODO: supress #showtooltip spam
+	-- supress #showtooltip spam
+	if string.find(arg1 or "" , "^#showtooltip") then
+		return
+	end
 
 	Original_ChatFrame_OnEvent(event);
 end

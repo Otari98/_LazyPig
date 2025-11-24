@@ -58,69 +58,68 @@ LazyPigOptions = {
 		exclusive = true,
 		checkBoxes = {
 			{ text = ALWAYS, var = "SALVA", value = 1, tooltip = ALWAYS, setFunc = LazyPig_CheckSalvation },
-			{ text = "Smart", var = "SALVA", value = 2, tooltip = "Warrior Shield / Druid Bear Form / Paladin Righteous Fury", setFunc = LazyPig_CheckSalvation },
+			{ text = "Smart", var = "SALVA", value = 2, tooltip = "Smart", tooltipSub = "Auto remove if:\nYou are Warrior and have shield equipped,\nYou are Druid in Bear Form,\nYou are Paladin with Righteous Fury.", setFunc = LazyPig_CheckSalvation },
 		},
 	},
 	{
 		text = "Mana Buffs Remover",
-		exclusive = true,
 		checkBoxes = {
-			{ text = ALWAYS, var = "REMOVEMANABUFFS", value = 1, tooltip = "Remove Blessing of Wisdom / Arcane Intellect / Prayer or Spirit", setFunc = LazyPig_CheckManaBuffs },
+			{ text = ALWAYS, var = "REMOVEMANABUFFS", tooltip = "Auto remove Blessing of Wisdom / Arcane Intellect / Prayer of Spirit.", setFunc = LazyPig_CheckManaBuffs },
 		},
 	},
 	{
 		text = "Group Invite Accept Rules",
 		checkBoxes = {
-			{ text = "GuildMates", var = "GINV", tooltip = "GuildMates" },
-			{ text = "Friends", var = "FINV", tooltip = "Friends" },
-			{ text = "Strangers", var = "SINV", tooltip = "Strangers" },
-			{ text = "Idle while in BG or Queue", var = "DINV", tooltip = "No Auto Accept Invites while in Battleground or Queue" }
+			{ text = "GuildMates", var = "GINV", tooltip = "Auto accept invites from guild members." },
+			{ text = "Friends", var = "FINV", tooltip = "Auto accept invites from friends." },
+			{ text = "Strangers", var = "SINV", tooltip = "Auto accept invites from strangers." },
+			{ text = "Idle while in BG or Queue", var = "DINV", tooltip = "Do not auto accept invites while in battleground or queue." }
 		},
 	},
 	{
 		text = "Battlegrounds Automation",
 		checkBoxes = {
-			{ text = "Enter Battleground", var = "EBG", tooltip = "Enter the Battleground as soon as the queue popup" },
-			{ text = "Leave Battleground", var = "LBG", tooltip = "Leave the Battleground as soon as its finished" },
-			{ text = "Queue Battleground", var = "QBG", tooltip = "Join the queue as soon as the BattleMaster is right-clicked" },
-			{ text = "Auto Release", var = "RBG", tooltip = "Auto Accept Release in BG" },
-			{ text = "Leader Queue Announce", var = "AQUE", tooltip = "Leader Queue Announce" },
-			{ text = "Block BG Quest Sharing", var = "SBG", tooltip = "Block BG Quest Sharing" }
+			{ text = "Enter Battleground", var = "EBG", tooltip = "Enter battleground as soon as the queue popup." },
+			{ text = "Leave Battleground", var = "LBG", tooltip = "Leave battleground as soon as it's finished." },
+			{ text = "Queue Battleground", var = "QBG", tooltip = "Join first available queue as soon as the battle master is right-clicked." },
+			{ text = "Auto Release", var = "RBG", tooltip = "Auto release spirit in battlegrounds." },
+			{ text = "Leader Queue Announce", var = "AQUE", tooltip = "Auto announce joining battleground queue as a raid leader." },
+			{ text = "Block BG Quest Sharing", var = "SBG", tooltip = "Auto decline shared quests while in battlegrounds." }
 		},
 	},
 	{
 		text = "Chat Filter",
 		checkBoxes = {
-			{ text = "Players' Spam", var = "SPAM", tooltip = "Players' Spam" },
-			{ text = "Uncommon Roll", var = "SPAM_UNCOMMON", tooltip = "Uncommon Roll" },
-			{ text = "Rare Roll", var = "SPAM_RARE", tooltip = "Rare Roll" },
-			{ text = "Poor-Common Loot", var = "SPAM_LOOT", tooltip = "Poor-Common Loot" },
-			{ text = "Lazy Pig Messages", var = "ROLLMSG", tooltip = "Lazy Pig Auto Roll Messages" }
+			{ text = "Players' Spam", var = "SPAM", tooltip = "Hide players' spam messages." },
+			{ text = "Uncommon Roll", var = "SPAM_UNCOMMON", tooltip = "Hide uncommon (green) loot roll messages." },
+			{ text = "Rare Roll", var = "SPAM_RARE", tooltip = "Hide rare (blue) loot roll messages." },
+			{ text = "Poor-Common Loot", var = "SPAM_LOOT", tooltip = "Hide poor and common (grey and white) loot roll messages." },
+			{ text = "LazyPig Messages", var = "ROLLMSG", tooltip = "Show LazyPig auto roll messages." }
 		},
 	},
 	{
 		text = "World Chat Mute",
 		checkBoxes = {
-			{ text = "Dungeons", var = "WORLDDUNGEON", tooltip = "Dungeons", setFunc = LazyPig_ZoneCheck },
-			{ text = "Raids", var = "WORLDRAID", tooltip = "Raids", setFunc = LazyPig_ZoneCheck },
-			{ text = "Battlegrounds", var = "WORLDBG", tooltip = "Battlegrounds", setFunc = LazyPig_ZoneCheck },
-			{ text = "Mute Permanently", var = "WORLDUNCHECK", tooltip = "Mute WorldChannel for good...", setFunc = LazyPig_ZoneCheck }
+			{ text = "Dungeons", var = "WORLDDUNGEON", tooltip = "Mute world chat while in dungeons.", setFunc = LazyPig_ZoneCheck },
+			{ text = "Raids", var = "WORLDRAID", tooltip = "Mute world chat while in raids.", setFunc = LazyPig_ZoneCheck },
+			{ text = "Battlegrounds", var = "WORLDBG", tooltip = "Mute world chat while in battlegrounds.", setFunc = LazyPig_ZoneCheck },
+			{ text = "Mute Permanently", var = "WORLDUNCHECK", tooltip = "Mute world chat for good...", setFunc = LazyPig_ZoneCheck }
 		},
 	},
 	{
 		text = MISCELLANEOUS,
 		checkBoxes = {
-			{ text = "Summon Auto Accept", var = "SUMM", tooltip = "Summon Auto Accept", tooltipSub = "If checked summons will be accepted before they expire" },
-			{ text = "Loot Window Auto Position", var = "LOOT", tooltip = "Loot Window Auto Position", tooltipSub = "Position the loot window under the mouse-cursor"},
-			{ text = "Improved Right Click", var = "RIGHT", tooltip = "Improved Right Click", tooltipSub = "Right Click to Drag and Drop Items into Mail, Trade, Auction Frames", setFunc = LazyPig_MailtoCheck },
-			{ text = "Easy Stack Split/Merge", var = "SHIFTSPLIT", tooltip = "Easy Stack Split/Merge (Shift + Right Click)", setFunc = LazyPig_MailtoCheck },
-			{ text = "Extended Camera Distance", var = "CAM", tooltip = "Extended Camera Distance", tooltipSub = "Extend the Camera Distance to its maximum", setFunc = LazyPig_RefreshCamera },
-			{ text = "Special Key Combinations", var = "SPECIALKEY", tooltip = "Special Key Combinations", tooltipSub = "Activate the Special-Key-Combinations" },
-			{ text = "Duel Auto Decline", var = "DUEL", tooltip = "Duel Auto Decline (Shift to Bypass)" },
-			{ text = "Instance Resurrection Auto Accept", var = "REZ", tooltip = "Instance Resurrection Auto Accept", tooltipSub = "Auto Accept Resurrection if Out of Combat" },
-			{ text = "Gossip Auto Processing", var = "GOSSIP", tooltip = "Gossip Auto Processing (Shift to Bypass)", tooltipSub = "Skip Gossip Windows Choises from Innkeepers, Fly Masters etc." },
-			{ text = "Auto Dismount", var = "DISMOUNT", tooltip = "Auto Dismount", tooltipSub = "Auto Dismount when it's required by another action" },
-			{ text = "Auto Stance", var = "AUTOSTANCE", tooltip = "Auto Stance", tooltipSub = "Automatically change to required warrior stance/druid form on spell cast" },
+			{ text = "Summon Auto Accept", var = "SUMM", tooltip = "Summon Auto Accept", tooltipSub = "If checked summons will be accepted before they expire." },
+			{ text = "Loot Window Auto Position", var = "LOOT", tooltip = "Loot Window Auto Position", tooltipSub = "Position the loot window under the mouse cursor."},
+			{ text = "Improved Right Click", var = "RIGHT", tooltip = "Improved Right Click", tooltipSub = "Right Click to drag and drop items into Mail, Trade, Auction Frames.", setFunc = LazyPig_MailtoCheck },
+			{ text = "Easy Stack Split/Merge", var = "SHIFTSPLIT", tooltip = "Easy stack split/merge", tooltipSub = "Shift + Right Click on item to start, hold Control or Alt to change split amount, Shift + Right Click on item again to finish.", setFunc = LazyPig_MailtoCheck },
+			{ text = "Extended Camera Distance", var = "CAM", tooltip = "Extended Camera Distance", tooltipSub = "Extend the camera distance to its maximum.", setFunc = LazyPig_RefreshCamera },
+			{ text = "Special Key Combinations", var = "SPECIALKEY", tooltip = "Special Key Combinations", tooltipSub = "Activate the Special Key Combinations, click Keybinds button for more details." },
+			{ text = "Duel Auto Decline", var = "DUEL", tooltip = "Auto decline duels (hold Shift to bypass)." },
+			{ text = "Instance Resurrection Auto Accept", var = "REZ", tooltip = "Instance Resurrection Auto Accept", tooltipSub = "Auto accept resurrection in raids, dungeons and battlegrounds if player resurrecting you is out of combat." },
+			{ text = "Gossip Auto Processing", var = "GOSSIP", tooltip = "Gossip Auto Processing (hold Shift to bypass)", tooltipSub = "Skip gossip choises from innkeepers, fly masters etc." },
+			{ text = "Auto Dismount", var = "DISMOUNT", tooltip = "Auto Dismount", tooltipSub = "Auto dismount when it's required by another action." },
+			{ text = "Auto Stance", var = "AUTOSTANCE", tooltip = "Auto Stance", tooltipSub = "Automatically change to required warrior stance/druid form on spell cast." },
 		},
 	},
 }
@@ -131,7 +130,7 @@ function LazyPig_CreateOptionsFrame()
 	tinsert(UISpecialFrames,"LazyPigOptionsFrame")
 	frame:SetFrameStrata("DIALOG")
 	frame:SetWidth(500)
-	frame:SetHeight(630)
+	frame:SetHeight(650)
 	frame:SetPoint("CENTER", UIParent, 0, 80)
 	frame:SetBackdrop({
 		bgFile = "Interface\\Buttons\\WHITE8x8",
@@ -218,28 +217,31 @@ function LazyPig_CreateOptionsFrame()
 	end)
 
 	local height = 16
-	local offsetX, offsetY = 30, -45
+	local insetLeft = 30
+	local insetTop = -32
+	local columnWidth = 240
+	local offsetX, offsetY = insetLeft, insetTop
 	local index = 1
 	for i = 1, getn(LazyPigOptions) do
 		if i == 10 then
-			offsetX, offsetY = offsetX + 240, -45
+			offsetX, offsetY = insetLeft + columnWidth, insetTop
 		end
 		
 		-- Check box group title
 		local fontString = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
-		fontString:SetPoint("TOPLEFT", frame, "TOPLEFT", offsetX, offsetY - 5)
+		fontString:SetPoint("TOPLEFT", frame, "TOPLEFT", offsetX, offsetY - 10)
 		fontString:SetTextColor(1, 1, 1, 1)
 		fontString:SetText(LazyPigOptions[i].text)
 		
-		offsetY = offsetY - height
+		offsetY = offsetY - height - 5
 		
 		for j = 1, getn(LazyPigOptions[i].checkBoxes) do
 			local checkBox = CreateFrame("CheckButton", "$parentCheckBox"..index, frame, "UICheckButtonTemplate")
 			local checkBoxText = _G[checkBox:GetName().."Text"]
 			
 			checkBox:SetPoint("TOPLEFT", frame, "TOPLEFT", offsetX + 5, offsetY)
-			checkBox:SetWidth(16)
-			checkBox:SetHeight(16)
+			checkBox:SetWidth(22)
+			checkBox:SetHeight(22)
 			checkBoxText:SetText(LazyPigOptions[i].checkBoxes[j].text)
 			checkBox.textR, checkBox.textG, checkBox.textB = checkBoxText:GetTextColor()
 			
@@ -315,6 +317,4 @@ function LazyPig_CreateOptionsFrame()
 			index = index + 1
 		end
 	end
-
-	return frame
 end
