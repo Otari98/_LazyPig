@@ -439,9 +439,8 @@ function LazyPig_OnEvent(event)
 		end
 		QuestRecord["index"] = 0
 
-	elseif LPCONFIG.SALVA and (event == "UNIT_INVENTORY_CHANGED" or event == "PLAYER_AURAS_CHANGED" or (event == "UPDATE_BONUS_ACTIONBAR" and LazyPig_PlayerClass("Druid", "player"))) then
+	elseif event == "UNIT_INVENTORY_CHANGED" or event == "PLAYER_AURAS_CHANGED" or (event == "UPDATE_BONUS_ACTIONBAR" and LazyPig_PlayerClass("Druid", "player")) then
 		LazyPig_CheckSalvation()
-	elseif LPCONFIG.REMOVEMANABUFFS and (event == "UNIT_INVENTORY_CHANGED" or event == "PLAYER_AURAS_CHANGED" or (event == "UPDATE_BONUS_ACTIONBAR" and LazyPig_PlayerClass("Druid", "player"))) then
 		LazyPig_CheckManaBuffs()
 
 	elseif event == "DUEL_REQUESTED" then
