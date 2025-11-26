@@ -24,6 +24,7 @@ LPCONFIG.MC = nil                  -- [number or nil] MC mats auto roll
 LPCONFIG.AQ = nil                  -- [number or nil] AQ scarabs/idols auto roll
 LPCONFIG.SAND = 1                  -- [number or nil] Corrupted sand auto roll
 LPCONFIG.ES_SHARDS = nil           -- [number or nil] Dream Shrads auto roll
+LPCONFIG.NAXX = nil                -- [number or nil] Scraps auto roll
 LPCONFIG.ROLLMSG = false           -- Lazy Pig Auto Roll Messages
 LPCONFIG.DUEL = false              -- Auto cancel duels
 LPCONFIG.SPECIALKEY = false        -- Special key combinations
@@ -991,6 +992,13 @@ local ESloot = {
 	[61198] = "Small Dream Shard",
 }
 
+local NaxxLoot = {
+	[22373] = "Wartorn Leather Scrap",
+	[22374] = "Wartorn Chain Scrap",
+	[22375] = "Wartorn Plate Scrap",
+	[22376] = "Wartorn Cloth Scrap",
+}
+
 function LazyPig_AutoRoll(id)
 	local roll = nil
 	local _, _, _, quality = GetLootRollItemInfo(id)
@@ -1027,10 +1035,20 @@ function LazyPig_AutoRoll(id)
 		roll = 1
 		RollOnLoot(id, 1)
 	end
+	-- Need on everything in Alterac Valley
+	if LazyPig_BG() then
+		roll = 1
+		RollOnLoot(id, 1)
+	end
 
 	if LPCONFIG.ES_SHARDS and ESloot[itemID] then
 		roll = LPCONFIG.ES_SHARDS
 		RollOnLoot(id, LPCONFIG.ES_SHARDS)
+	end
+
+	if LPCONFIG.NAXX and NaxxLoot[itemID] then
+		roll = LPCONFIG.NAXX
+		RollOnLoot(id, LPCONFIG.NAXX)
 	end
 
 	if LPCONFIG.ROLLMSG and type(roll) == "number" then

@@ -54,6 +54,15 @@ LazyPigOptions = {
 		},
 	},
 	{
+		text = "Naxxramas Roll Automation",
+		exclusive = true,
+		checkBoxes = {
+			{ text = NEED, var = "NAXX", value = 1, tooltip = NEED },
+			{ text = GREED, var = "NAXX", value = 2, tooltip = GREED },
+			{ text = PASS, var = "NAXX", value = 0, tooltip = PASS },
+		},
+	},
+	{
 		text = "Salvation Remover",
 		exclusive = true,
 		checkBoxes = {
@@ -130,7 +139,7 @@ function LazyPig_CreateOptionsFrame()
 	tinsert(UISpecialFrames,"LazyPigOptionsFrame")
 	frame:SetFrameStrata("DIALOG")
 	frame:SetWidth(500)
-	frame:SetHeight(650)
+	frame:SetHeight(670)
 	frame:SetPoint("CENTER", UIParent, 0, 80)
 	frame:SetBackdrop({
 		bgFile = "Interface\\Buttons\\WHITE8x8",
