@@ -218,6 +218,9 @@ function LazyPig_Command(msg)
 		elseif subcmd == "remove" and pattern and pattern ~= "" then
 			LPCONFIG.GOSSIP_AUTO_SELECT[pattern] = nil
 			DEFAULT_CHAT_FRAME:AddMessage("|cffff0000LazyPig: Removed gossip auto-select for '"..pattern.."'|r")
+		elseif subcmd == "clear" then
+			LPCONFIG.GOSSIP_AUTO_SELECT = {}
+			DEFAULT_CHAT_FRAME:AddMessage("|cffff0000LazyPig: Cleared all gossip auto-select patterns|r")
 		elseif subcmd == "list" then
 			DEFAULT_CHAT_FRAME:AddMessage("|cff00eeeeLazyPig: Gossip Auto-Select Patterns:|r")
 			local count = 0
@@ -234,6 +237,7 @@ function LazyPig_Command(msg)
 			DEFAULT_CHAT_FRAME:AddMessage("|cff00eeeeLazyPig Gossip Commands:|r")
 			DEFAULT_CHAT_FRAME:AddMessage("  /lp gossip add <text> - Add gossip text pattern")
 			DEFAULT_CHAT_FRAME:AddMessage("  /lp gossip remove <text> - Remove gossip text pattern")
+			DEFAULT_CHAT_FRAME:AddMessage("  /lp gossip clear - Clear all patterns")
 			DEFAULT_CHAT_FRAME:AddMessage("  /lp gossip list - List all patterns")
 		end
 	else
