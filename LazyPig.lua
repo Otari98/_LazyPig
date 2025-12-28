@@ -38,6 +38,7 @@ LPCONFIG.SPAM_RARE = false         -- Hide blue items roll messages
 LPCONFIG.SHIFTSPLIT = false        -- Improved stack splitting with shift
 LPCONFIG.REZ = false               -- Auto accept resurrection while in raid, dungeon or bg if resurrecter is out of combat
 LPCONFIG.GOSSIP = true             -- Auto proccess gossip
+LPCONFIG.GOSSIP_AUTO_SELECT = {}   -- Custom gossip text patterns to auto-select
 LPCONFIG.SALVA = nil               -- [number or nil] Autoremove Blessing of Salvation
 LPCONFIG.REMOVEMANABUFFS = false   -- Autoremove Blessing of Wisdom, Arcane Intellect, Prayer of Spirit
 
@@ -191,11 +192,56 @@ function LazyPig_OnLoad()
 	this:RegisterEvent("UI_INFO_MESSAGE")
 end
 
-function LazyPig_Command()
-	if LazyPigOptionsFrame:IsShown() then
-		LazyPigOptionsFrame:Hide()
+function LazyPig_CheckGossipAutoSelect(gossipText)
+	if not LPCONFIG.GOSSIP_AUTO_SELECT or not gossipText then
+		return false
+	end
+	
+	for pattern, enabled in pairs(LPCONFIG.GOSSIP_AUTO_SELECT) do
+		if enabled and string.find(strlower(gossipText), strlower(pattern), 1, true) then
+			return true
+		end
+	end
+	
+	return false
+end
+
+function LazyPig_Command(msg)
+	local _, _, cmd, arg = string.find(msg or "", "^(%S+)%s*(.*)$")
+	
+	if cmd == "gossip" then
+		local _, _, subcmd, pattern = string.find(arg or "", "^(%S+)%s*(.*)$")
+		
+		if subcmd == "add" and pattern and pattern ~= "" then
+			LPCONFIG.GOSSIP_AUTO_SELECT[pattern] = true
+			DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00LazyPig: Added gossip auto-select for '"..pattern.."'|r")
+		elseif subcmd == "remove" and pattern and pattern ~= "" then
+			LPCONFIG.GOSSIP_AUTO_SELECT[pattern] = nil
+			DEFAULT_CHAT_FRAME:AddMessage("|cffff0000LazyPig: Removed gossip auto-select for '"..pattern.."'|r")
+		elseif subcmd == "list" then
+			DEFAULT_CHAT_FRAME:AddMessage("|cff00eeeeLazyPig: Gossip Auto-Select Patterns:|r")
+			local count = 0
+			for pattern, enabled in pairs(LPCONFIG.GOSSIP_AUTO_SELECT) do
+				if enabled then
+					DEFAULT_CHAT_FRAME:AddMessage("  - "..pattern)
+					count = count + 1
+				end
+			end
+			if count == 0 then
+				DEFAULT_CHAT_FRAME:AddMessage("  (none configured)")
+			end
+		else
+			DEFAULT_CHAT_FRAME:AddMessage("|cff00eeeeLazyPig Gossip Commands:|r")
+			DEFAULT_CHAT_FRAME:AddMessage("  /lp gossip add <text> - Add gossip text pattern")
+			DEFAULT_CHAT_FRAME:AddMessage("  /lp gossip remove <text> - Remove gossip text pattern")
+			DEFAULT_CHAT_FRAME:AddMessage("  /lp gossip list - List all patterns")
+		end
 	else
-		LazyPigOptionsFrame:Show()
+		if LazyPigOptionsFrame:IsShown() then
+			LazyPigOptionsFrame:Hide()
+		else
+			LazyPigOptionsFrame:Show()
+		end
 	end
 end
 
@@ -415,6 +461,9 @@ local ErrorStanding = {
 function LazyPig_OnEvent(event)
 	if event == "ADDON_LOADED" and arg1 == "_LazyPig" then
 		this:UnregisterEvent("ADDON_LOADED")
+		if not LPCONFIG.GOSSIP_AUTO_SELECT then 
+			LPCONFIG.GOSSIP_AUTO_SELECT = {} 
+		end
 		local title = GetAddOnMetadata("_LazyPig", "Title")
 		local version = GetAddOnMetadata("_LazyPig", "Version")
 		DEFAULT_CHAT_FRAME:AddMessage(title.." v"..version.."|cffffffff".." loaded, type".."|cff00eeee".." /lp".."|cffffffff for options")
@@ -601,7 +650,43 @@ function LazyPig_OnEvent(event)
 		--DEFAULT_CHAT_FRAME:AddMessage("active: "..table.getn(ActiveQuest))
 		--DEFAULT_CHAT_FRAME:AddMessage("available: "..table.getn(AvailableQuest))
 
-		for i=1, 5 do
+		-- Check for custom gossip auto-select patterns
+		local customPatternMatched = false
+		if not gossipnr and processgossip then
+			-- Check available quests
+			for i = 1, table.getn(AvailableQuest) do
+				if AvailableQuest[i] and LazyPig_CheckGossipAutoSelect(AvailableQuest[i]) then
+					Original_SelectGossipAvailableQuest(i)
+					customPatternMatched = true
+					return
+				end
+			end
+			
+			-- Check active quests
+			for i = 1, table.getn(ActiveQuest) do
+				if ActiveQuest[i] and LazyPig_CheckGossipAutoSelect(ActiveQuest[i]) then
+					Original_SelectGossipActiveQuest(i)
+					customPatternMatched = true
+					return
+				end
+			end
+			
+			-- Check regular gossip options
+			local gossipArgs = { GetGossipOptions() }
+			for i = 1, table.getn(gossipArgs), 2 do
+				local text = gossipArgs[i]
+				if text and LazyPig_CheckGossipAutoSelect(text) then
+					gossipnr = (i+1)/2
+					gossipbreak = false
+					customPatternMatched = true
+					break
+				end
+			end
+		end
+
+		-- Only run standard gossip processing if custom pattern didn't match
+		if not customPatternMatched then
+			for i=1, 5 do
 			if not GossipOptions[i] then
 				break
 			end
@@ -626,6 +711,7 @@ function LazyPig_OnEvent(event)
 				gossipnr = i
 				LazyPig_Dismount();
 			end
+		end
 		end
 
 		if not gossipbreak and gossipnr then
