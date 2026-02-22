@@ -67,7 +67,8 @@ local tradedelay = 0
 local bgstatus = 0
 local tmp_splitval = 1
 local passpopup = 0
-
+local timeLeft = 0
+local updateInterval = 0.1
 local ctrltime = 0
 local alttime = 0
 local shift_time = 0
@@ -113,17 +114,10 @@ ScheduleSplit.sbag = {}
 ScheduleSplit.count = {}
 
 local function twipe(t)
-	if type(t) == "table" then
-		for i = table.getn(t), 1, -1 do
-			table.remove(t, i)
-		end
-		for k in next, t do
-			t[k] = nil
-		end
-		return t
-	else
-		return {}
-	end
+	if type(t) ~= "table" then return {} end
+	for i = table.getn(t), 1, -1 do table.remove(t, i) end
+	for k in pairs(t) do t[k] = nil end
+	return t
 end
 
 local function strsplit(str, delimiter, container)
@@ -200,12 +194,10 @@ function LazyPig_Command()
 	end
 end
 
-function LazyPig_OnUpdate()
-	if (this.tick or 0.1) > GetTime() then
-		return
-	else
-		this.tick = GetTime() + 0.1
-	end
+function LazyPig_OnUpdate(elapsed)
+	timeLeft = timeLeft - elapsed
+	if timeLeft > 0 then return end
+	timeLeft = updateInterval
 
 	local current_time = GetTime();
 	local shiftstatus = IsShiftKeyDown();
@@ -1996,8 +1988,13 @@ function LazyPig_ChatFrame_OnEvent(event)
         return
     end
 
-	-- supress #showtooltip spam
+	-- suppress #showtooltip spam
 	if string.find(arg1 or "" , "^#showtooltip") then
+		return
+	end
+
+	-- suppress rested xp spam
+	if string.find(arg1 or "", "=== .+ RESTED XP") and arg2 ~= UnitName("player") then
 		return
 	end
 

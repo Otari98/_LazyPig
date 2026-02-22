@@ -12,7 +12,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 				LazyPig_OnEvent(event)
 			</OnEvent>
 			<OnUpdate>
-				LazyPig_OnUpdate()
+				LazyPig_OnUpdate(arg1)
 			</OnUpdate>
 		</Scripts>
 		<Anchors>
