@@ -508,12 +508,10 @@ function LazyPig_OnEvent(event)
 		if ErrorStanding[arg1] then
 			SitOrStand()
 		else
-			if LPCONFIG.DISMOUNT then
-				if ErrorDismountAndForm[arg1] then
-					UIErrorsFrame:Clear()
-					LazyPig_Dismount()
-					LazyPig_CancelShapeshiftBuff()
-				end
+			if LPCONFIG.DISMOUNT and ErrorDismountAndForm[arg1] then
+				UIErrorsFrame:Clear()
+				LazyPig_Dismount()
+				LazyPig_CancelShapeshiftBuff()
 			end
 			if LPCONFIG.AUTOSTANCE then
 				LazyPig_AutoStance(arg1)
@@ -1096,31 +1094,31 @@ local function MoneyToString(money)
 end
 
 function LazyPig_GreySellRepair()
-	local i = 0
-	for bag = 0, NUM_BAG_FRAMES do
-		for slot = 1, GetContainerNumSlots(bag) do
-			local link = GetContainerItemLink(bag, slot)
-			local _, _, locked = GetContainerItemInfo(bag, slot)
-			local _, _, id = string.find(link or "", "item:(%d+)")
-			id = tonumber(id)
-			local _, _, quality = GetItemInfo(id or 0)
-			if quality and quality == 0 and not locked then
-				UseContainerItem(bag, slot)
-				i = i + 1
-				if i > 4 then
-					bag = NUM_BAG_FRAMES
-					break
+	if C_MerchantFrame then
+		if C_MerchantFrame.GetNumJunkItems() > 0 then C_MerchantFrame.SellAllJunkItems() end
+	else
+		local i = 0
+		for bag = 0, NUM_BAG_FRAMES do
+			for slot = 1, GetContainerNumSlots(bag) do
+				local link = GetContainerItemLink(bag, slot)
+				local _, _, locked = GetContainerItemInfo(bag, slot)
+				local _, _, id = string.find(link or "", "item:(%d+)")
+				id = tonumber(id)
+				local _, _, quality = GetItemInfo(id or 0)
+				if quality and quality == 0 and not locked then
+					UseContainerItem(bag, slot)
+					i = i + 1
+					if i > 4 then
+						bag = NUM_BAG_FRAMES
+						break
+					end
 				end
 			end
 		end
 	end
-	if not CanMerchantRepair() then
-		return
-	end
+	if not CanMerchantRepair() then return end
 	local rcost = GetRepairAllCost()
-	if rcost == 0 then
-		return
-	end
+	if rcost == 0 then return end
 	if rcost > GetMoney() then
 		DEFAULT_CHAT_FRAME:AddMessage("LazyPig: Not enough money to repair")
 		return
@@ -1321,6 +1319,7 @@ local dismountStrings = {
 }
 
 function LazyPig_Dismount()
+	if Dismount then return Dismount() end
 	local buff = 0
 	while GetPlayerBuff(buff) >= 0 do
 		LazyPig_Buff_Tooltip:SetPlayerBuff(GetPlayerBuff(buff))
@@ -1378,11 +1377,11 @@ function LazyPig_ItemIsTradeable(bag, item)
 
 	for i = 1, LazyPig_Buff_Tooltip:NumLines(), 1 do
 		local text = _G["LazyPig_Buff_TooltipTextLeft" .. i]:GetText();
-		if  text == ITEM_SOULBOUND  then
+		if text == ITEM_SOULBOUND then
 			return nil
-		elseif  text == ITEM_BIND_QUEST  then
+		elseif  text == ITEM_BIND_QUEST then
 			return nil
-		elseif  text == ITEM_CONJURED  then
+		elseif  text == ITEM_CONJURED then
 			return nil
 		end
 	end
@@ -1772,7 +1771,7 @@ function LazyPig_BindLootOpen()
 end
 
 local process = function(ChatFrame, name)
-    for index, value in ChatFrame.channelList do
+    for index, value in pairs(ChatFrame.channelList) do
         if strupper(name) == strupper(value) then
             return true
         end
@@ -1788,7 +1787,7 @@ function LazyPig_ZoneCheck()
 			local id, name = GetChannelName("world")
 			if id > 0 then
 				if leavechat then
-					if process(ChatFrame, name)  then
+					if process(ChatFrame, name) then
 						ChatFrame_RemoveChannel(ChatFrame, name)
 						channelstatus = true
 						UIErrorsFrame:Clear();
@@ -1820,14 +1819,16 @@ function LazyPig_PlayerClass(class, unit)
 	if class then
 		unit = unit or "player"
 		local _, c = UnitClass(unit)
-		if c then
-			return string.lower(c) == string.lower(class)
-		end
+		return c == string.upper(class)
 	end
 	return false
 end
 
 function LazyPig_IsBearForm()
+	if GetShapeshiftFormID then
+		local id = GetShapeshiftFormID()
+		return id == 5 or id == 8
+	end
 	for i = 1 , GetNumShapeshiftForms() do
 		local _, name, isActive = GetShapeshiftFormInfo(i)
 		if isActive and LazyPig_PlayerClass("Druid") and (name == "Bear Form" or name == "Dire Bear Form") then
@@ -1849,6 +1850,7 @@ function LazyPig_IsShieldEquipped()
 end
 
 function LazyPig_CancelShapeshiftBuff()
+	if CancelShapeshiftForm then return CancelShapeshiftForm() end
 	for i = 1, GetNumShapeshiftForms() do
 		local _, _, isActive = GetShapeshiftFormInfo(i)
 		if isActive and LazyPig_PlayerClass("Druid") then
