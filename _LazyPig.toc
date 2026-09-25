@@ -1,6 +1,6 @@
 ## Interface: 11200
 ## Title: [|cff3fcf26K|r] LazyPig
-## Version: 6.2.1
+## Version: 6.2.2
 ## Notes: Common tasks automation, type /lp for configuration.
 ## Author: Ogrisch, mrmr, |cffbe5effLexie|r and |c013220ffTrumpetX|r
 ## SavedVariables: LPCONFIG

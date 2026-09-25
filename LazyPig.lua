@@ -1319,7 +1319,7 @@ local stancesPattern = string.gsub(SPELL_FAILED_ONLY_SHAPESHIFT, "%%s", "(.+)")
 function LazyPig_AutoStance(msg)
 	local _, _, stances = string.find(msg, stancesPattern)
 	if not stances then return end
-	for stance in string.gfind(stances, "[^,]") do
+	for stance in string.gfind(stances, "[^,]+") do
 		CastSpellByName((string.gsub(stance, "^%s*(.-)%s*$", "%1")))
 	end
 end
