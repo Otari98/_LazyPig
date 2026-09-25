@@ -36,7 +36,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 	<GameTooltip name="LazyPig_Buff_Tooltip" hidden="true" inherits="GameTooltipTemplate">
 		<Scripts>
 			<OnLoad>
-				this:SetOwner(this, "ANCHOR_NONE")
+				this:SetOwner(WorldFrame, "ANCHOR_NONE")
 			</OnLoad>
 		</Scripts>
 	</GameTooltip>

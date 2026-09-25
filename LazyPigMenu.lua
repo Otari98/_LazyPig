@@ -308,7 +308,7 @@ function LazyPig_CreateOptionsFrame()
 				_G[this:GetName().."Text"]:SetTextColor(1, 1, 1)
 				if this.tooltip then
 					GameTooltip:SetOwner(this, "ANCHOR_TOPRIGHT")
-					GameTooltip:SetBackdropColor(.01, .01, .01, .91)
+					-- GameTooltip:SetBackdropColor(.01, .01, .01, .91)
 					GameTooltip:SetText(this.tooltip, nil, nil, nil, 1, true)
 					if this.tooltipSub then
 						GameTooltip:AddLine(this.tooltipSub, 1, 1, 1, true)
