@@ -1347,6 +1347,13 @@ function LazyPig_DropWSGFlag_NoggBuff()
 end
 
 function LazyPig_ItemIsTradeable(bag, item)
+	-- [OctoWoW] ClassicAPI reports soulbound directly; skip the tooltip scan for those
+	if C_Container and C_Container.GetContainerItemInfo then
+		local info = C_Container.GetContainerItemInfo(bag, item)
+		if info and info.isBound then
+			return false
+		end
+	end
 	LazyPig_Buff_Tooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
 	LazyPig_Buff_Tooltip:SetBagItem(bag, item)
 	for i = 1, LazyPig_Buff_Tooltip:NumLines(), 1 do
