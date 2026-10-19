@@ -40,6 +40,8 @@ LPCONFIG.REZ = false               -- Auto accept resurrection while in raid, du
 LPCONFIG.GOSSIP = true             -- Auto proccess gossip
 LPCONFIG.SALVA = nil               -- [number or nil] Autoremove Blessing of Salvation
 LPCONFIG.REMOVEMANABUFFS = false   -- Autoremove Blessing of Wisdom, Arcane Intellect, Prayer of Spirit
+LPCONFIG.AUTOSELL = true           -- Automatically sell grey items
+LPCONFIG.AUTOREPAIR = true         -- Automatically repair
 
 BINDING_HEADER_LP_HEADER = "_LazyPig";
 BINDING_NAME_LOGOUT = "Logout";
@@ -79,6 +81,7 @@ local greenrolltime = 0
 local shamanTankTree = 2 -- Enhancement
 local shamanTankTalent = 11 -- Spirit Armor
 
+local selling = nil
 local timer_split = nil
 local player_summon_confirm = nil
 local player_summon_message = nil
@@ -297,9 +300,8 @@ function LazyPig_OnUpdate(elapsed)
 		end
 	end
 
-	if merchantstatus and altstatus and current_time > last_click and not CursorHasItem() then
-		last_click = current_time + 0.25
-		LazyPig_GreySellRepair();
+	if merchantstatus and selling and not CursorHasItem() then
+		LazyPig_GreySell();
 	end
 
 	if not QuestHaste then
@@ -475,9 +477,12 @@ function LazyPig_OnEvent(event)
 
 	elseif event == "MERCHANT_SHOW" then
 		merchantstatus = true
+		LazyPig_GreySell()
+		LazyPig_Repair()
 
 	elseif event == "MERCHANT_CLOSED" then
 		merchantstatus = false
+		selling = nil
 
 	elseif event == "TRADE_SHOW" then
 		tradestatus = true
@@ -1080,38 +1085,48 @@ local function MoneyToString(money)
 	return COLOR_GOLD..gold.."g|r "..COLOR_SILVER..silver.."s|r "..COLOR_COPPER..copper.."c|r"
 end
 
-function LazyPig_GreySellRepair()
-	if C_MerchantFrame then
-		if C_MerchantFrame.GetNumJunkItems() > 0 then C_MerchantFrame.SellAllJunkItems() end
-	else
-		local i = 0
-		for bag = 0, NUM_BAG_FRAMES do
-			for slot = 1, GetContainerNumSlots(bag) do
-				local link = GetContainerItemLink(bag, slot)
-				local _, _, locked = GetContainerItemInfo(bag, slot)
-				local _, _, id = string.find(link or "", "item:(%d+)")
-				id = tonumber(id)
-				local _, _, quality = GetItemInfo(id or 0)
-				if quality and quality == 0 and not locked then
-					UseContainerItem(bag, slot)
-					i = i + 1
-					if i > 4 then
-						bag = NUM_BAG_FRAMES
-						break
-					end
-				end
+local function GetNextJunkItem()
+	for bag = 0, NUM_BAG_FRAMES do
+		for slot = 1, GetContainerNumSlots(bag) do
+			local _, _, locked = GetContainerItemInfo(bag, slot)
+			local _, itemString = LazyPig_DecodeItemLink(GetContainerItemLink(bag, slot))
+			local _, _, quality, _, _, _, _, _, _, sellPrice = GetItemInfo(itemString or 0)
+			if quality and quality == 0 and not locked then
+				return bag, slot
 			end
 		end
 	end
-	if not CanMerchantRepair() then return end
-	local rcost = GetRepairAllCost()
-	if rcost == 0 then return end
-	if rcost > GetMoney() then
-		DEFAULT_CHAT_FRAME:AddMessage("LazyPig: Not enough money to repair")
-		return
+	return nil
+end
+
+function LazyPig_GreySell()
+	if LPCONFIG.AUTOSELL then
+		if C_MerchantFrame then
+			if C_MerchantFrame.GetNumJunkItems() > 0 then C_MerchantFrame.SellAllJunkItems() end
+		else
+			local bag, slot = GetNextJunkItem()
+			if bag and slot then
+				selling = true
+				UseContainerItem(bag, slot)
+			else
+				selling = nil
+			end
+		end
 	end
-	RepairAllItems()
-	DEFAULT_CHAT_FRAME:AddMessage("LazyPig: Repaired all items for "..MoneyToString(rcost))
+end
+
+function LazyPig_Repair()
+	if LPCONFIG.AUTOREPAIR then
+		if not CanMerchantRepair() then return end
+		local rcost = GetRepairAllCost()
+		if rcost == 0 then return end
+		if rcost > GetMoney() then
+			DEFAULT_CHAT_FRAME:AddMessage("LazyPig: Not enough money to repair")
+			return
+		end
+		RepairAllItems()
+		DEFAULT_CHAT_FRAME:AddMessage("LazyPig: Repaired all items for "..MoneyToString(rcost))
+	end
 end
 
 function LazyPig_ProcessQuests(...)

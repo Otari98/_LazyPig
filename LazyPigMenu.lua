@@ -129,6 +129,8 @@ LazyPigOptions = {
 			{ text = "Gossip Auto Processing", var = "GOSSIP", tooltip = "Gossip Auto Processing (hold Shift to bypass)", tooltipSub = "Skip gossip choises from innkeepers, fly masters etc." },
 			{ text = "Auto Dismount", var = "DISMOUNT", tooltip = "Auto Dismount", tooltipSub = "Auto dismount when it's required by another action." },
 			{ text = "Auto Stance", var = "AUTOSTANCE", tooltip = "Auto Stance", tooltipSub = "Automatically change to required warrior stance/druid form on spell cast." },
+			{ text = "Auto Sell Junk", var = "AUTOSELL", tooltip = "Auto Sell Junk", tooltipSub = "Automatically sell grey items when talking to vendor." },
+			{ text = "Auto Repair", var = "AUTOREPAIR", tooltip = "Auto Repair", tooltipSub = "Automatically repair items when talking to vendor." },
 		},
 	},
 }
@@ -139,7 +141,7 @@ function LazyPig_CreateOptionsFrame()
 	tinsert(UISpecialFrames,"LazyPigOptionsFrame")
 	frame:SetFrameStrata("DIALOG")
 	frame:SetWidth(500)
-	frame:SetHeight(670)
+	frame:SetHeight(700)
 	frame:SetPoint("CENTER", UIParent, 0, 80)
 	frame:SetBackdrop({
 		bgFile = "Interface\\Buttons\\WHITE8x8",
