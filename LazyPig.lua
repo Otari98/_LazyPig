@@ -1346,18 +1346,6 @@ function LazyPig_DropWSGFlag_NoggBuff()
 	end
 end
 
-function LazyPig_ItemIsTradeable(bag, item)
-	LazyPig_Buff_Tooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
-	LazyPig_Buff_Tooltip:SetBagItem(bag, item)
-	for i = 1, LazyPig_Buff_Tooltip:NumLines(), 1 do
-		local text = _G["LazyPig_Buff_TooltipTextLeft" .. i]:GetText()
-		if text == ITEM_SOULBOUND or text == ITEM_BIND_QUEST or text == ITEM_CONJURED then
-			return false
-		end
-	end
-	return true
-end
-
 function LazyPig_Raid()
 	local inInstance, instanceType = IsInInstance()
 	return inInstance and instanceType == "raid"
@@ -1452,16 +1440,16 @@ function LazyPig_WatchSplit(enable)
 end
 
 local ItemArray = {}
-function LazyPig_UseContainerItem(ParentID,ItemID)
+function LazyPig_UseContainerItem(bagID, bagSlot)
 	if LPCONFIG.SHIFTSPLIT and not CursorHasItem() and not merchantstatus and IsShiftKeyDown() and not IsAltKeyDown() then
-		if(GetTime() - last_click) < 0.3 then return end
-		local _, itemCount, locked = GetContainerItemInfo(ParentID, ItemID)
+		if (GetTime() - last_click) < 0.3 then return end
+		local _, itemCount, locked = GetContainerItemInfo(bagID, bagSlot)
 		if locked or not itemCount then return end
 		if not LazyPig_WatchSplit(true) then return end
 		last_click = GetTime()
 
 		ItemArray = twipe(ItemArray)
-		local name, id = LazyPig_DecodeItemLink(GetContainerItemLink(ParentID,ItemID))
+		local name, id = LazyPig_DecodeItemLink(GetContainerItemLink(bagID, bagSlot))
 		local _, _, _, _, _, _, maxstack = GetItemInfo(id)
 		local out_slpit = tmp_splitval
 
@@ -1475,35 +1463,27 @@ function LazyPig_UseContainerItem(ParentID,ItemID)
 		local cursoritem = nil
 
 		if itemCount < out_slpit then
-			dbag, dslot = ParentID, ItemID
+			dbag, dslot = bagID, bagSlot
 			dcount = out_slpit - itemCount
 			cursoritem = true
 		end
 
 		if name then
-			for b=0, NUM_BAG_FRAMES do
-				local bagslots = GetContainerNumSlots(b)
-				if bagslots and bagslots > 0 then
-					for s=1, bagslots do
-						local link = GetContainerItemLink(b, s)
-						local n, c, l = GetContainerItemInfo(b, s)
-						if not cursoritem or cursoritem and not (b == ParentID and s == ItemID) then
-							if not link and not dbag and not dslot then
+			for b = 0, NUM_BAG_FRAMES do
+				for s = 1, GetContainerNumSlots(b) do
+					local link = GetContainerItemLink(b, s)
+					local n, c, l = GetContainerItemInfo(b, s)
+					if not cursoritem or cursoritem and not (b == bagID and s == bagSlot) then
+						if not link and not dbag and not dslot then
+							dbag, dslot = b, s
+							--DEFAULT_CHAT_FRAME:AddMessage(b.." "..s.." - scan mode1")
+						elseif n and n == name and not l then
+							if not (itemCount < out_slpit) and not dbag and not dslot and c < out_slpit then
 								dbag, dslot = b, s
-								--DEFAULT_CHAT_FRAME:AddMessage(b.." "..s.." - scan mode1")
-							elseif n then
-								if n == name then
-								--if (string.find(n, name) or n == name) then
-									if not l then
-										if not (itemCount < out_slpit) and not dbag and not dslot and c < out_slpit then
-											dbag, dslot = b, s
-											dcount = out_slpit - c
-											--DEFAULT_CHAT_FRAME:AddMessage("b.." "..s.." count - "..c.." - "..scan mode2)
-										elseif c ~= out_slpit or cursoritem then
-											ItemArray[b.."_"..s] = c
-										end
-									end
-								end
+								dcount = out_slpit - c
+								--DEFAULT_CHAT_FRAME:AddMessage("b.." "..s.." count - "..c.." - "..scan mode2)
+							elseif c ~= out_slpit or cursoritem then
+								ItemArray[b.."_"..s] = c
 							end
 						end
 					end
@@ -1520,18 +1500,18 @@ function LazyPig_UseContainerItem(ParentID,ItemID)
 				local number = nil
 				local index = nil
 
-				for blockindex,blockmatch in pairs(ItemArray) do
+				for blockindex, blockmatch in pairs(ItemArray) do
 					local x = nil
 					local y = nil
-					x = string.gsub(blockindex,"_(.+)","")
+					x = string.gsub(blockindex, "_(.+)", "")
 					x = tonumber(x)
-					y = string.gsub(blockindex,"(.+)_","")
+					y = string.gsub(blockindex, "(.+)_", "")
 					y = tonumber(y)
 
-					if not number or number > blockmatch or number == blockmatch and (x*10 + y) > score then
+					if not number or number > blockmatch or number == blockmatch and (x * 10 + y) > score then
 						sbag = x
 						sslot = y
-						score = 10*sbag + sslot
+						score = 10 * sbag + sslot
 						number = blockmatch
 						index = blockindex
 					end
@@ -1564,96 +1544,88 @@ function LazyPig_UseContainerItem(ParentID,ItemID)
 			end
 		end
 		return
+	end
 
-	elseif LPCONFIG.RIGHT and tradestatus and not IsShiftKeyDown() and not IsAltKeyDown() and LazyPig_ItemIsTradeable(ParentID,ItemID) then
-		PickupContainerItem(ParentID,ItemID)
+	if not LPCONFIG.RIGHT then
+		return OriginalUseContainerItem(bagID, bagSlot)
+	end
+
+	if tradestatus and not IsShiftKeyDown() and not IsAltKeyDown() then
+		PickupContainerItem(bagID, bagSlot)
 		local slot = TradeFrame_GetAvailableSlot()
 		if slot then ClickTradeButton(slot) end
-		if CursorHasItem() then
-			ClearCursor()
-		end
+		ClearCursor()
 		return
 
-	elseif LPCONFIG.RIGHT and GMailFrame and GMailFrame:IsVisible() and not CursorHasItem() then
-		local bag, item = ParentID,ItemID
+	elseif GMailFrame and GMailFrame:IsVisible() and not CursorHasItem() then
 		for i = 1, GMAIL_NUMITEMBUTTONS, 1 do
-			if  not _G["GMailButton" .. i].item  then
-
-				if  GMail:ItemIsMailable(bag, item)  then
+			if not _G["GMailButton"..i].item then
+				if GMail:ItemIsMailable(bagID, bagSlot) then
 					GMail:Print("GMail: Cannot attach item.", 1, 0.5, 0)
 					return
 				end
-				PickupContainerItem(bag, item)
+				PickupContainerItem(bagID, bagSlot)
 				--GMail.hooks["PickupContainerItem"].orig(bag, item)
-				GMail:MailButton_OnClick(_G["GMailButton" .. i])
+				GMail:MailButton_OnClick(_G["GMailButton"..i])
 				GMail:UpdateItemButtons()
 				return
 			end
 		end
 
-	elseif LPCONFIG.RIGHT and CT_MailFrame and CT_MailFrame:IsVisible() and not IsShiftKeyDown() and not IsAltKeyDown() then
-		local bag, item = ParentID,ItemID
-		if  ( CT_Mail_GetItemFrame(bag, item) or ( CT_Mail_addItem and CT_Mail_addItem[1] == bag and CT_Mail_addItem[2] == item ) ) and not special  then
+	elseif CT_MailFrame and CT_MailFrame:IsVisible() and not IsShiftKeyDown() and not IsAltKeyDown() then
+		if (CT_Mail_GetItemFrame(bagID, bagSlot) or (CT_Mail_addItem and CT_Mail_addItem[1] == bagID and CT_Mail_addItem[2] == bagSlot)) and not special then
 			return;
 		end
-		if  not CursorHasItem()  then
-			CT_MailFrame.bag = bag;
-			CT_MailFrame.item = item;
+		if not CursorHasItem() then
+			CT_MailFrame.bag = bagID;
+			CT_MailFrame.item = bagSlot;
 		end
-		if  CT_MailFrame:IsVisible() and not CursorHasItem()  then
+		if CT_MailFrame:IsVisible() and not CursorHasItem() then
 			for i = 1, CT_MAIL_NUMITEMBUTTONS, 1 do
-				if  not _G["CT_MailButton" .. i].item then
-
-					local canMail = CT_Mail_ItemIsMailable(bag, item);
-					if  canMail  then
-						DEFAULT_CHAT_FRAME:AddMessage("<CTMod> Cannot attach item, item is " .. canMail, 1, 0.5, 0);
+				if not _G["CT_MailButton"..i].item then
+					local canMail = CT_Mail_ItemIsMailable(bagID, bagSlot);
+					if canMail then
+						DEFAULT_CHAT_FRAME:AddMessage("<CTMod> Cannot attach item, item is "..canMail, 1, 0.5, 0);
 						return;
 					end
 
-					CT_oldPickupContainerItem(bag, item);
-					CT_MailButton_OnClick(_G["CT_MailButton" .. i]);
+					CT_oldPickupContainerItem(bagID, bagSlot);
+					CT_MailButton_OnClick(_G["CT_MailButton"..i]);
 					CT_Mail_UpdateItemButtons();
 					return;
 				end
 			end
 		end
 
-	elseif LPCONFIG.RIGHT and mailstatus and not IsShiftKeyDown() and not IsAltKeyDown() then
-		if not LazyPig_ItemIsTradeable(ParentID,ItemID) then
-			DEFAULT_CHAT_FRAME:AddMessage("LazyPig: Cannot attach item", 1, 0.5, 0);
-			return
-		end
+	elseif mailstatus and not IsShiftKeyDown() and not IsAltKeyDown() then
+		MailFrameTab_OnClick(2)
+		PickupContainerItem(bagID, bagSlot)
+		ClickSendMailItemButton()
+		PutItemInBackpack()
+		PutItemInBag(20)
+		PutItemInBag(21)
+		PutItemInBag(22)
+		PutItemInBag(23)
+		ClearCursor()
+		return
 
-		if InboxFrame and InboxFrame:IsVisible() then
-			MailFrameTab_OnClick(2);
-			return
-		end
-		if SendMailFrame and SendMailFrame:IsVisible() then
-			PickupContainerItem(ParentID,ItemID)
-			ClickSendMailItemButton()
-			if CursorHasItem() then
-				ClearCursor()
-			end
-			return
-		end
-
-	elseif LPCONFIG.RIGHT and auctionstatus and not IsShiftKeyDown() and not IsAltKeyDown() then
-		if not LazyPig_ItemIsTradeable(ParentID,ItemID) then
-			DEFAULT_CHAT_FRAME:AddMessage("LazyPig: Cannot sell item", 1, 0.5, 0);
-			return
-		end
-		if not AuctionFrameAuctions:IsVisible() then
-			AuctionFrameTab3:Click()
-			return
-		end
-		PickupContainerItem(ParentID,ItemID)
-		ClickAuctionSellItemButton()
-		if CursorHasItem() then
+	elseif auctionstatus and not IsShiftKeyDown() and not IsAltKeyDown() then
+		if AuctionFrame.selectedTab == 1 then
+			BrowseName:SetText(LazyPig_DecodeItemLink(GetContainerItemLink(bagID, bagSlot)) or "")
+		elseif AuctionFrame.selectedTab == 3 then
+			PickupContainerItem(bagID, bagSlot)
+			ClickAuctionSellItemButton()
+			PutItemInBackpack()
+			PutItemInBag(20)
+			PutItemInBag(21)
+			PutItemInBag(22)
+			PutItemInBag(23)
 			ClearCursor()
 		end
 		return
 	end
-	OriginalUseContainerItem(ParentID,ItemID)
+
+	return OriginalUseContainerItem(bagID, bagSlot)
 end
 
 function ScheduleItemSplit(sbag, sslot, dbag, dslot, count)
