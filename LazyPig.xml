@@ -3,16 +3,16 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 	<Script file="LazyPig.lua"/>
 	<Script file="LazyPigMenu.lua"/>
 	<Script file="LazyPigKeybindsFrame.lua"/>
-	<Frame name="LazyPig">	
+	<Frame name="LazyPigFrame">
 		<Scripts>
 			<OnLoad>
-				LazyPig_OnLoad()
+				LazyPig.OnLoad()
 			</OnLoad>
 			<OnEvent>
-				LazyPig_OnEvent(event)
+				LazyPig.OnEvent(event)
 			</OnEvent>
 			<OnUpdate>
-				LazyPig_OnUpdate(arg1)
+				LazyPig.OnUpdate(arg1)
 			</OnUpdate>
 		</Scripts>
 		<Anchors>
@@ -20,7 +20,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 		</Anchors>
 		<Size x="256" y="256"/>
 		<Layers>
-			<Layer level="ARTWORK">		
+			<Layer level="ARTWORK">
 				<FontString name="LazyPigText" font="Fonts\FRIZQT__.TTF" outline="THICK" hidden="true">
 					<Size x="512" y="0"/>
 					<Anchors>
@@ -29,7 +29,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 						</Anchor>
 					</Anchors>
 					<FontHeight val="18"/>
-				</FontString>	
+				</FontString>
 			</Layer>
 		</Layers>
 	</Frame>

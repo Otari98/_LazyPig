@@ -1,5 +1,3 @@
-local _G = _G or getfenv(0)
-
 local FontstringTables = {
 	["Non-Configurable Keys"] = {
 		[0] = "LazyPigNCE",
@@ -43,28 +41,28 @@ local function FontstringGroup(hParent, offsetX, offsetY, sTitle, tCheck, tCol1,
 
 	frame.fst = {}
 	frame.fsc = {}
-	
+
 	local max_width = { 0, nil }
 
-	for k,v in ipairs(tCheck) do
+	for k, v in ipairs(tCheck) do
 		local fst = frame:CreateFontString(v[1], "ARTWORK", "GameFontNormalSmall")
-		fst:SetPoint("TOPLEFT", frame, "BOTTOMLEFT", 8, -(4+(k-1)*10))
+		fst:SetPoint("TOPLEFT", frame, "BOTTOMLEFT", 8, -(4 + (k - 1) * 10))
 		fst:SetText(v[2])
 		fst:SetTextColor(tCol1[1], tCol1[2], tCol1[3], tCol1[4])
 		local temp = fst:GetStringWidth()
-		if temp > max_width[1] then 
+		if temp > max_width[1] then
 			max_width[1] = temp
 			max_width[2] = fst
 		end
 
 		frame.fst[k] = fst
 	end
-	for k,v in ipairs(tCheck) do
+	for k, v in ipairs(tCheck) do
 		local fsname
 		if not bKB then
 			fsname = v[1].."Content"
 		else
-			fsname = "LP_KB" .. tostring(k)
+			fsname = "LP_KB"..tostring(k)
 		end
 		local fsc = frame:CreateFontString(fsname, "ARTWORK", "GameFontNormalSmall")
 		fsc:SetPoint("LEFT", _G[v[1]], "LEFT", 16 + max_width[1], 0)
@@ -81,21 +79,21 @@ local function ShowBindings(bind, fs, desc)
 
 	local printout = nil
 	if bind1 and bind2 then
-		printout = "[" .. bind1 .. "/" .. bind2 .. "]"
+		printout = "["..bind1.."/"..bind2.."]"
 	elseif bind1 then
-		printout = "[" .. bind1 .. "]"
+		printout = "["..bind1.."]"
 	elseif bind2 then
-		printout = "[" .. bind2 .. "]"
+		printout = "["..bind2.."]"
 	elseif desc then
-		printout = "[" .. desc .. "]"
+		printout = "["..desc.."]"
 	else
 		printout = "none"
-		fsl:SetTextColor(1,1,1,1)
+		fsl:SetTextColor(1, 1, 1, 1)
 	end
 	fsl:SetText(printout)
 end
 
-function LazyPig_CreateKeybindsFrame()
+function LazyPig.CreateKeybindsFrame()
 	-- Keybinds Frame
 	local frame = CreateFrame("Frame", "LazyPigKeybindsFrame", LazyPigOptionsFrame)
 	frame:SetWidth(600)
@@ -158,9 +156,9 @@ function LazyPig_CreateKeybindsFrame()
 	frame.fs_title = fs_title
 
 	local st = "Non-Configurable Keys"
-	frame.fsgroup_NCE = FontstringGroup(frame, 20, -25, st, FontstringTables[st], {1, .81, 0}, {1, 1, 1})
+	frame.fsgroup_NCE = FontstringGroup(frame, 20, -25, st, FontstringTables[st], { 1, .81, 0 }, { 1, 1, 1 })
 	st = "Special Key-Combinations"
-	frame.fsgroup_SKCB = FontstringGroup(frame, 20, -85, st, FontstringTables[st], {1, .81, 0}, {.8, .1, .1})
+	frame.fsgroup_SKCB = FontstringGroup(frame, 20, -85, st, FontstringTables[st], { 1, .81, 0 }, { .8, .1, .1 })
 	st = "Configurable Keys"
-	frame.fsgroup_CKB = FontstringGroup(frame, 255, -85, st, FontstringTables[st], {1, .81, 0}, {.8, .1, .1}, true)
+	frame.fsgroup_CKB = FontstringGroup(frame, 255, -85, st, FontstringTables[st], { 1, .81, 0 }, { .8, .1, .1 }, true)
 end

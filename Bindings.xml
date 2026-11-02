@@ -9,12 +9,12 @@
 		ReloadUI()
 	</Binding>
 	<Binding name="DUEL">
-		LazyPig_Duel_EFC()
+		LazyPig.Duel_EFC()
 	</Binding>
 	<Binding name="WSGDROP">
-		LazyPig_DropWSGFlag_NoggBuff()
+		LazyPig.DropWSGFlag_NoggBuff()
 	</Binding>
 	<Binding name="MENU">
-		LazyPig_Command()
+		LazyPig.Command()
 	</Binding>
 </Bindings>

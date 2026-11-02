@@ -66,14 +66,14 @@ LazyPigOptions = {
 		text = "Salvation Remover",
 		exclusive = true,
 		checkBoxes = {
-			{ text = ALWAYS, var = "SALVA", value = 1, tooltip = ALWAYS, setFunc = LazyPig_CheckSalvation },
-			{ text = "Smart", var = "SALVA", value = 2, tooltip = "Smart", tooltipSub = "Auto remove if:\nYou are Warrior and have shield equipped,\nYou are Shaman and have shield equipped and have Spirit Armor talent rank 2,\nYou are Druid in Bear Form,\nYou are Paladin with Righteous Fury.", setFunc = LazyPig_CheckSalvation },
+			{ text = ALWAYS, var = "SALVA", value = 1, tooltip = ALWAYS, setFunc = LazyPig.CheckSalvation },
+			{ text = "Smart", var = "SALVA", value = 2, tooltip = "Smart", tooltipSub = "Auto remove if:\nYou are Warrior and have shield equipped,\nYou are Shaman and have shield equipped and have Spirit Armor talent rank 2,\nYou are Druid in Bear Form,\nYou are Paladin with Righteous Fury.", setFunc = LazyPig.CheckSalvation },
 		},
 	},
 	{
 		text = "Mana Buffs Remover",
 		checkBoxes = {
-			{ text = ALWAYS, var = "REMOVEMANABUFFS", tooltip = "Auto remove Blessing of Wisdom / Arcane Intellect / Prayer of Spirit. Disabled in battlegrounds.", setFunc = LazyPig_CheckManaBuffs },
+			{ text = ALWAYS, var = "REMOVEMANABUFFS", tooltip = "Auto remove Blessing of Wisdom / Arcane Intellect / Prayer of Spirit. Disabled in battlegrounds.", setFunc = LazyPig.CheckManaBuffs },
 		},
 	},
 	{
@@ -109,20 +109,20 @@ LazyPigOptions = {
 	{
 		text = "World Chat Mute",
 		checkBoxes = {
-			{ text = "Dungeons", var = "WORLDDUNGEON", tooltip = "Mute world chat while in dungeons.", setFunc = LazyPig_ZoneCheck },
-			{ text = "Raids", var = "WORLDRAID", tooltip = "Mute world chat while in raids.", setFunc = LazyPig_ZoneCheck },
-			{ text = "Battlegrounds", var = "WORLDBG", tooltip = "Mute world chat while in battlegrounds.", setFunc = LazyPig_ZoneCheck },
-			{ text = "Mute Permanently", var = "WORLDUNCHECK", tooltip = "Mute world chat for good...", setFunc = LazyPig_ZoneCheck }
+			{ text = "Dungeons", var = "WORLDDUNGEON", tooltip = "Mute world chat while in dungeons.", setFunc = LazyPig.ZoneCheck },
+			{ text = "Raids", var = "WORLDRAID", tooltip = "Mute world chat while in raids.", setFunc = LazyPig.ZoneCheck },
+			{ text = "Battlegrounds", var = "WORLDBG", tooltip = "Mute world chat while in battlegrounds.", setFunc = LazyPig.ZoneCheck },
+			{ text = "Mute Permanently", var = "WORLDUNCHECK", tooltip = "Mute world chat for good...", setFunc = LazyPig.ZoneCheck }
 		},
 	},
 	{
 		text = MISCELLANEOUS,
 		checkBoxes = {
 			{ text = "Summon Auto Accept", var = "SUMM", tooltip = "Summon Auto Accept", tooltipSub = "If checked summons will be accepted before they expire." },
-			{ text = "Loot Window Auto Position", var = "LOOT", tooltip = "Loot Window Auto Position", tooltipSub = "Position the loot window under the mouse cursor."},
-			{ text = "Improved Right Click", var = "RIGHT", tooltip = "Improved Right Click", tooltipSub = "Right Click to drag and drop items into Mail, Trade, Auction Frames.", setFunc = LazyPig_MailtoCheck },
-			{ text = "Easy Stack Split/Merge", var = "SHIFTSPLIT", tooltip = "Easy stack split/merge", tooltipSub = "Shift + Right Click on item to start, hold Control or Alt to change split amount, Shift + Right Click on item again to finish.", setFunc = LazyPig_MailtoCheck },
-			{ text = "Extended Camera Distance", var = "CAM", tooltip = "Extended Camera Distance", tooltipSub = "Extend the camera distance to its maximum.", setFunc = LazyPig_RefreshCamera },
+			{ text = "Loot Window Auto Position", var = "LOOT", tooltip = "Loot Window Auto Position", tooltipSub = "Position the loot window under the mouse cursor." },
+			{ text = "Improved Right Click", var = "RIGHT", tooltip = "Improved Right Click", tooltipSub = "Right Click to drag and drop items into Mail, Trade, Auction Frames.", setFunc = LazyPig.MailtoCheck },
+			{ text = "Easy Stack Split/Merge", var = "SHIFTSPLIT", tooltip = "Easy stack split/merge", tooltipSub = "Shift + Right Click on item to start, hold Control or Alt to change split amount, Shift + Right Click on item again to finish.", setFunc = LazyPig.MailtoCheck },
+			{ text = "Extended Camera Distance", var = "CAM", tooltip = "Extended Camera Distance", tooltipSub = "Extend the camera distance to its maximum.", setFunc = LazyPig.RefreshCamera },
 			{ text = "Special Key Combinations", var = "SPECIALKEY", tooltip = "Special Key Combinations", tooltipSub = "Activate the Special Key Combinations, click Keybinds button for more details." },
 			{ text = "Duel Auto Decline", var = "DUEL", tooltip = "Auto decline duels (hold Shift to bypass)." },
 			{ text = "Instance Resurrection Auto Accept", var = "REZ", tooltip = "Instance Resurrection Auto Accept", tooltipSub = "Auto accept resurrection in raids, dungeons and battlegrounds if player resurrecting you is out of combat." },
@@ -135,10 +135,10 @@ LazyPigOptions = {
 	},
 }
 
-function LazyPig_CreateOptionsFrame()
+function LazyPig.CreateOptionsFrame()
 	-- Option Frame
 	local frame = CreateFrame("Frame", "LazyPigOptionsFrame", UIParent)
-	tinsert(UISpecialFrames,"LazyPigOptionsFrame")
+	tinsert(UISpecialFrames, "LazyPigOptionsFrame")
 	frame:SetFrameStrata("DIALOG")
 	frame:SetWidth(500)
 	frame:SetHeight(700)
@@ -190,7 +190,7 @@ function LazyPig_CreateOptionsFrame()
 	local LP_VERSION = GetAddOnMetadata("_LazyPig", "Version")
 	fs_title:SetPoint("CENTER", frame.texture_title, "CENTER", 0, 12)
 	fs_title:SetText("LazyPig Options")
-	
+
 	local versionText = frame:CreateFontString("$parentVersionText", "ARTWORK", "GameFontNormalSmall")
 	versionText:SetPoint("TOPLEFT", frame, 20, -20)
 	versionText:SetText("version: "..LP_VERSION)
@@ -202,12 +202,12 @@ function LazyPig_CreateOptionsFrame()
 	btn_close:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -12, -12)
 	btn_close:SetWidth(32)
 	btn_close:SetHeight(32)
-	
+
 	frame.btn_close = btn_close
 
 	frame.btn_close:SetScript("OnClick", function()
 		this:GetParent():Hide()
-			LazyPigKeybindsFrame:Hide()
+		LazyPigKeybindsFrame:Hide()
 	end)
 
 	-- Keybinds Window Button
@@ -237,28 +237,28 @@ function LazyPig_CreateOptionsFrame()
 		if i == 10 then
 			offsetX, offsetY = insetLeft + columnWidth, insetTop
 		end
-		
+
 		-- Check box group title
 		local fontString = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
 		fontString:SetPoint("TOPLEFT", frame, "TOPLEFT", offsetX, offsetY - 10)
 		fontString:SetTextColor(1, 1, 1, 1)
 		fontString:SetText(LazyPigOptions[i].text)
-		
+
 		offsetY = offsetY - height - 5
-		
+
 		for j = 1, getn(LazyPigOptions[i].checkBoxes) do
 			local checkBox = CreateFrame("CheckButton", "$parentCheckBox"..index, frame, "UICheckButtonTemplate")
 			local checkBoxText = _G[checkBox:GetName().."Text"]
-			
+
 			checkBox:SetPoint("TOPLEFT", frame, "TOPLEFT", offsetX + 5, offsetY)
 			checkBox:SetWidth(22)
 			checkBox:SetHeight(22)
 			checkBoxText:SetText(LazyPigOptions[i].checkBoxes[j].text)
 			checkBox.textR, checkBox.textG, checkBox.textB = checkBoxText:GetTextColor()
-			
+
 			-- Makes text clickable
 			checkBox:SetHitRectInsets(0, -(checkBoxText:GetWidth() + 5), 0, 0)
-			
+
 			LazyPigOptions[i].checkBoxes[j].frame = checkBox
 			checkBox.tooltip = LazyPigOptions[i].checkBoxes[j].tooltip
 			checkBox.tooltipSub = LazyPigOptions[i].checkBoxes[j].tooltipSub
