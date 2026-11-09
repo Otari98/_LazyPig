@@ -735,7 +735,8 @@ end
 function LazyPig.IsFriend(name)
 	if not (name and type(name) == "string") then return false end
 	for i = 1, GetNumFriends() do
-		if string.lower(GetFriendInfo(i)) == string.lower(name) then return true end
+		local friendName = GetFriendInfo(i)
+		if friendName and string.lower(friendName) == string.lower(name) then return true end
 	end
 	return false
 end
@@ -743,7 +744,8 @@ end
 function LazyPig.IsGuildMate(name)
 	if not (IsInGuild() and name and type(name) == "string") then return false end
 	for i = 1, GetNumGuildMembers() do
-		if string.lower(GetGuildRosterInfo(i)) == string.lower(name) then return true end
+		local guildMember = GetGuildRosterInfo(i)
+		if guildMember and string.lower(guildMember) == string.lower(name) then return true end
 	end
 	return false
 end
