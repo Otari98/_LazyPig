@@ -107,7 +107,7 @@ LazyPig.QuestRecord = {}
 LazyPig.ActiveQuest = {}
 LazyPig.AvailableQuest = {}
 LazyPig.GossipOptions = {}
-LazyPig.ChatMessage = { {}, {}, INDEX = 1 }
+LazyPig.ChatMessages = {}
 
 LazyPig.ScheduleSplit = {}
 LazyPig.ScheduleSplit.active = nil
@@ -329,7 +329,11 @@ function LazyPig.OnUpdate(elapsed)
 	if current_time - roster_task_refresh > 29 then
 		roster_task_refresh = current_time
 		GuildRoster()
-		LazyPig.ChatSpamClean()
+		for _, messages in pairs(LazyPig.ChatMessages) do
+			for text, time in pairs(messages) do
+				if time + 30 < current_time then messages[text] = nil end
+			end
+		end
 	end
 
 	if player_summon_confirm then
@@ -1876,18 +1880,18 @@ function LazyPig.ChatFrame_OnEvent(event)
 		end
 	end
 
-	if LPCONFIG.SPAM and arg2 and arg2 ~= GetUnitName("player") and (event == "CHAT_MSG_SAY" or event == "CHAT_MSG_CHANNEL" or event == "CHAT_MSG_YELL" or event == "CHAT_MSG_EMOTE" and not (LazyPig.IsGuildMate(arg2) or LazyPig.IsFriend(arg2))) then
-		local time = GetTime()
-		local index = LazyPig.ChatMessage["INDEX"]
+	if LPCONFIG.SPAM and arg2 and arg2 ~= GetUnitName("player") and not LazyPig.IsGuildMate(arg2) and not LazyPig.IsFriend(arg2) and (event == "CHAT_MSG_SAY" or event == "CHAT_MSG_CHANNEL" or event == "CHAT_MSG_YELL" or event == "CHAT_MSG_EMOTE") then
+		local now = GetTime()
+		local chatFrameID = this:GetID()
+		if not LazyPig.ChatMessages[chatFrameID] then LazyPig.ChatMessages[chatFrameID] = {} end
 
-		for blockindex, blockmatch in pairs(LazyPig.ChatMessage[index]) do
-			local findmatch1 = (blockmatch + 70) > time --70s delay
-			local findmatch2 = blockindex == arg1
-			if findmatch1 and findmatch2 then
+		for text, time in pairs(LazyPig.ChatMessages[chatFrameID]) do
+			if text == arg1 and (time + 30) > now then
+				-- print(format("spam in ChatFrame%d: [%s] %s", chatFrameID, arg2, arg1))
 				return
 			end
 		end
-		LazyPig.ChatMessage[index][arg1] = time
+		LazyPig.ChatMessages[chatFrameID][arg1] = now
 	end
 
 	-- suppress BigWigs spam
@@ -1906,28 +1910,6 @@ function LazyPig.ChatFrame_OnEvent(event)
 	end
 
 	LazyPig.Hooks.ChatFrame_OnEvent(event)
-end
-
-function LazyPig.ChatSpamClean()
-	local time = GetTime()
-	local index = LazyPig.ChatMessage["INDEX"]
-	local newindex = nil
-
-	if index == 1 then
-		newindex = 2
-	else
-		newindex = 1
-	end
-
-	for blockindex, blockmatch in pairs(LazyPig.ChatMessage[index]) do
-		if (blockmatch + 70) > time then
-			LazyPig.ChatMessage[newindex][blockindex] = LazyPig.ChatMessage[index][blockindex]
-		end
-	end
-	twipe(LazyPig.ChatMessage[index])
-	LazyPig.ChatMessage["INDEX"] = newindex
-
-	--DEFAULT_CHAT_FRAME:AddMessage("ChatSpamClean")
 end
 
 function LazyPig.TrackEFC(msg)
