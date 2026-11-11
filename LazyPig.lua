@@ -1104,9 +1104,8 @@ end
 function LazyPig.ProcessQuests(t, ...)
 	twipe(t)
 	for i = 1, table.getn(arg), 2 do
-		local count, title, level = i, arg[i], arg[i + 1]
-		if count > 1 then count = (count + 1) / 2 end
-		t[count] = title.." "..level
+		local title, level = arg[i], arg[i + 1]
+		table.insert(t, title.." "..level)
 	end
 	return t
 end
